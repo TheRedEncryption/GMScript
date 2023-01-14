@@ -1,6 +1,10 @@
 const rexAllDigits = /^\d+$/;
+const rexAllNegativeDigits = /-\d+/;
 const contactProxyHandlers = {
     get(target, key) {
+        if (rexAllNegativeDigits.test(key) && Math.abs(key) <= target.scenes.length){
+            return target.scenes[target.scenes.length+parseInt(key)];
+        }
         if (rexAllDigits.test(key)) {
             return target.scenes[key];
         }
