@@ -11,6 +11,9 @@ const contactProxyHandlers = {
         return target[key];
     },
     set(target, key, value) {
+        if (rexAllNegativeDigits.test(key) && Math.abs(key) <= target.scenes.length){
+            return Reflect.set(target.scenes, target.scenes.length+parseInt(key), value);
+        }
         if (rexAllDigits.test(key)) {
             return Reflect.set(target.scenes, key, value);
         }
@@ -44,8 +47,15 @@ class Game {
 
 
 class Scene {
-    constructor(sprites = [new Sprite("square", 10, 10)]){
-        this.sprites = sprites;
+    // Realistically a Scene has no default sprites
+    #sprites;
+    constructor(sprites){
+        if(!Array.isArray(sprites)){throw Error(`${sprites} is not an Array`)}
+        this.#sprites = Array.isArray(sprites) ? sprites : [];
+    }
+
+    addSprites(){
+        
     }
 }
 
