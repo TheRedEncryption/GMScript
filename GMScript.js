@@ -27,8 +27,9 @@ class Game {
 
     createCanvas(){
         let canvas = document.createElement("canvas");
-        canvas.style.width = "100vw";
-        canvas.style.height = "5vh";
+        canvas.style.width = "50vw";
+        canvas.style.height = "60vh";
+        canvas.style.border = "2px solid black";
         document.querySelector("body").appendChild(canvas);
         return canvas;
     }
