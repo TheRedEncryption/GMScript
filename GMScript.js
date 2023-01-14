@@ -1,16 +1,24 @@
+const rexAllDigits = /^\d+$/;
+const contactProxyHandlers = {
+    get(target, key) {
+        if (rexAllDigits.test(key)) {
+            return target.scenes[key];
+        }
+        return target[key];
+    },
+    set(target, key, value) {
+        if (rexAllDigits.test(key)) {
+            return Reflect.set(target.scenes, key, value);
+        }
+        return Reflect.set(target, key, value);
+    }
+};
 class Game {
-    constructor(canvas = null, scenes = []) {
+    constructor(canvas = null, scenes = this.createScene()) {
         this.canvas = canvas!=null ? canvas : this.createCanvas();
         this.scenes = scenes;
         this.currentScenes = scenes[0]; 
-    }
-
-    [Symbol.iterator]() {
-        return {
-            next: () => {
-                // bs
-            }
-        };
+        return new Proxy(this, contactProxyHandlers);
     }
 
     createCanvas(){
@@ -20,9 +28,33 @@ class Game {
         document.querySelector("body").appendChild(canvas);
         return canvas;
     }
+
+    createScene(){
+        return [new Scene()];
+    }
+
+    updateScene(){
+
+    }
 }
 
-// wdym, class or list? prob class if we can make it act like a list
+
+class Scene {
+    constructor(sprites = [new Sprite("square", 10, 10)]){
+        this.sprites = sprites;
+    }
+}
+
+class Sprite{
+    constructor(type, x, y, color = "black"){
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.color = color;
+    }
+}
+
+// wdym? whether we should use class or list? prob class if we can make it act like a list
 // seems more open to future edits
 // YO IT WORKS, kinda. Google translate keeps saying French -> English
 
