@@ -1,6 +1,11 @@
+// a regex that gets all the digits
 const rexAllDigits = /^\d+$/;
+
+// a regex that gets all the negative digits
 const rexAllNegativeDigits = /-\d+/;
-const contactProxyHandlers = {
+
+// this is the get and set methods for the Game's Scene iterable
+const contactProxyHandlers = { 
     get(target, key) {
         if (rexAllNegativeDigits.test(key) && Math.abs(key) <= target.scenes.length) {
             return target.scenes[target.scenes.length + parseInt(key)];
@@ -20,6 +25,8 @@ const contactProxyHandlers = {
         return Reflect.set(target, key, value);
     }
 };
+
+// class declaration for the Game object
 class Game {
     constructor(canvas = null, scenes = this.createScene()) {
         this.canvas = canvas != null ? canvas : this.createCanvas();
@@ -32,6 +39,7 @@ class Game {
         return new Proxy(this, contactProxyHandlers);
     }
 
+    // if canvas not specified, then create one
     createCanvas() {
         let canvas = document.createElement("canvas");
         canvas.width = 600;
@@ -41,18 +49,21 @@ class Game {
         return canvas;
     }
 
+    // returns a new scene inside of an array
     createScene() {
         return [new Scene()];
     }
 
+    // Renders sprites to the current Scene
     renderScene() {
-        // Renders sprites to the current Scene
         this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.currentScene.render(this.canvas);
     }
     none(){
 
     }
+
+    // onStep
     onStep(onstep, stepsPerSecond = 60){
         let that = setInterval(()=>{
             onstep();
@@ -72,15 +83,20 @@ class Scene {
     addSprite() {
         console.log(this.spritesPrivateLater)
         let self = this.spritesPrivateLater;
+
+        // lets the user define the Sprite object to be added
         let addSpriteInit = function (type, x, y, color = "black") {
             if (!type || !x || !y) { throw new Error("addSprite requires (type, x, y) arguments or (Sprite)") }
             self.push(new Sprite(type, x, y, color))
         }
+
+        // lets the user create the sprite before calling addSprite()
         let addSpritePredefined = function (spriteSubclass) {
             if (! (spriteSubclass instanceof Sprite)) { throw new Error("addSprite requires (type, x, y) arguments or (Sprite)") }
             self.push(spriteSubclass)
         }
 
+        // calls the correct function based on the length of the arguments
         if(arguments.length==3){
             addSpriteInit(arguments[0],arguments[1],arguments[2])
         }
@@ -92,11 +108,13 @@ class Scene {
         }
     }
 
+    // lets you add a rectangle
     addRect(x, y, width, height, color = "black", isFilled = true, strokeColor = null) {
         if (!x || !y || !width || !height) { throw new Error("addRect requires (x, y, width, height) arguments") }
         this.spritesPrivateLater.push(new Rectangle(x, y, width, height, color, isFilled, strokeColor))
     }
 
+    // render function that draws all the sprites inside of each scene
     render(canvas) {
         let ctx = canvas.getContext("2d");
         this.spritesPrivateLater.forEach((sprite) => {
@@ -106,8 +124,13 @@ class Scene {
 
 }
 
+// declaration for the Sprite object (only serves as a superclass and does not work as a sprite of its own)
 class Sprite {
+
+    // list of acceptable types, can be expanded later
     #acceptableTypes = ["rect", "rectangle", "circle", "text", "line"];
+
+    // constructor for such
     constructor(type, x, y, color) {
         if (!this.#acceptableTypes.includes(type)) { throw new Error(`${type} is not a valid type, use one of the following: ${this.#acceptableTypes.join(", ")}`) }
         if(typeof x != "number" || typeof y != "number") { throw new Error(`x or y is not a number: x: ${x}, y: ${y}`)}
@@ -122,6 +145,7 @@ class Sprite {
     }
 }
 
+// rectangle class
 class Rectangle extends Sprite {
     constructor(x, y, width, height, fillColor = "black", isFilled = true, strokeColor = null) {
         super("rectangle", x, y, fillColor);
@@ -133,11 +157,13 @@ class Rectangle extends Sprite {
         this.fillColor = fillColor;
     }
 
+    // sets the line width
     setLineWidth(lineWidth = 1.0) {
         this.lineWidth = lineWidth
         return this;
     }
     
+    // updates the left, top, right, and bottom values to be used
     updateShape(){
         this.left = this.x;
         this.top = this.y;
@@ -145,6 +171,7 @@ class Rectangle extends Sprite {
         this.bottom = this.y+this.height;
     }
 
+    // the Rectangle's drawSprite() function
     drawSprite(ctx) {
         this.updateShape();
         ctx.beginPath();
