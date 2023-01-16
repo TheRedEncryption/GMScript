@@ -184,19 +184,19 @@ class Rectangle extends Sprite {
         return this;
     }
     
-    left(pixels){
+    setLeft(pixels){
         this.left = pixels;
         this.x = this.left;
     }
-    top(pixels){
+    setTop(pixels){
         this.top = pixels;
         this.y = this.top;
     }
-    right(pixels){
+    setRight(pixels){
         this.right = pixels;
         this.x = this.width-this.right;
     }
-    bottom(pixels){
+    setBottom(pixels){
         this.bottom = pixels;
         this.x = this.height-this.bottom;
     }
