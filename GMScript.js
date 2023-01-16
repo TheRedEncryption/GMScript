@@ -194,11 +194,11 @@ class Rectangle extends Sprite {
     }
     setRight(pixels){
         this.right = pixels;
-        this.x = this.width-this.right;
+        this.x = this.right-this.width;
     }
     setBottom(pixels){
         this.bottom = pixels;
-        this.x = this.height-this.bottom;
+        this.y = this.bottom-this.height;
     }
 
     // updates the left, top, right, and bottom values to be used
@@ -238,6 +238,14 @@ class ImageSprite extends Rectangle{
         this.updateShape();
         //ctx.drawImage(this.image, this.x, this.y);
         this.rotate(ctx);
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(0,0,0,100)";
+        ctx.strokeStyle = "rgba(0,0,0,0)";
+        ctx.lineWidth = 1;
+        ctx.rect(this.x, this.y, this.width, this.height);
+        ctx.fill();
+        ctx.stroke();
+        ctx.closePath();
     }
     
     // saves the canvas, translates, rotates, draws, and then restores
