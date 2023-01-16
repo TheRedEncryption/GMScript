@@ -138,10 +138,27 @@ class Sprite {
         this.x = x;
         this.y = y;
         this.color = color;
+        this.rotation = 0;
+        this.scale = 1.0;
+    }
+    
+    // converts degree input to radian (unless second parameter is false)
+    setRotation(rotation, isDegrees = true){
+        if(isDegrees){
+            this.rotation = rotation * Math.PI / 180
+        }
+        else {
+            this.rotation = rotation;
+        }
     }
 
     drawSprite(ctx) {
         console.log("sprite")
+    }
+
+    move(numberOfPixels){
+        this.x += cos(this.rotation)
+        this.y += sin(this.rotation)
     }
 }
 
@@ -155,6 +172,10 @@ class Rectangle extends Sprite {
         this.strokeColor = strokeColor;
         this.lineWidth = 1.0;
         this.fillColor = fillColor;
+        this.left = this.x;
+        this.top = this.y;
+        this.right = this.x+this.width;
+        this.bottom = this.y+this.height;
     }
 
     // sets the line width
@@ -163,6 +184,23 @@ class Rectangle extends Sprite {
         return this;
     }
     
+    left(pixels){
+        this.left = pixels;
+        this.x = this.left;
+    }
+    top(pixels){
+        this.top = pixels;
+        this.y = this.top;
+    }
+    right(pixels){
+        this.right = pixels;
+        this.x = this.width-this.right;
+    }
+    bottom(pixels){
+        this.bottom = pixels;
+        this.x = this.height-this.bottom;
+    }
+
     // updates the left, top, right, and bottom values to be used
     updateShape(){
         this.left = this.x;
@@ -187,7 +225,7 @@ class Rectangle extends Sprite {
 
 // image sprite (lets you use images as sprites)
 class ImageSprite extends Rectangle{
-    constructor(image, x, y){
+    constructor(image, x, y, width = 0, height = 0){
 
         super(x,y,0,0,"black",false);
         this.image = new Image();
@@ -198,6 +236,22 @@ class ImageSprite extends Rectangle{
 
     drawSprite(ctx) {
         this.updateShape();
-        ctx.drawImage(this.image, this.x, this.y);
+        //ctx.drawImage(this.image, this.x, this.y);
+        this.rotate(ctx);
+    }
+    
+    // saves the canvas, translates, rotates, draws, and then restores
+    rotate(ctx){
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.drawImage(this.image, 0 - this.width/2, 0-this.height/2, this.width, this.height);
+        ctx.restore();
+    }
+
+    updateShape(){
+        super.updateShape();
+        this.width = this.image.width;
+        this.height = this.image.height;
     }
 }
