@@ -184,3 +184,20 @@ class Rectangle extends Sprite {
         ctx.closePath();
     }
 }
+
+// image sprite (lets you use images as sprites)
+class ImageSprite extends Rectangle{
+    constructor(image, x, y){
+
+        super(x,y,0,0,"black",false);
+        this.image = new Image();
+        this.image.src = image;
+        this.width = this.image.width;
+        this.height = this.image.height;
+    }
+
+    drawSprite(ctx) {
+        this.updateShape();
+        ctx.drawImage(this.image, this.x, this.y);
+    }
+}
