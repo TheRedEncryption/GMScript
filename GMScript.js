@@ -23,6 +23,10 @@ const contactProxyHandlers = {
 class Game {
     constructor(canvas = null, scenes = this.createScene()) {
         this.canvas = canvas != null ? canvas : this.createCanvas();
+        this.left = 0;
+        this.top = 0;
+        this.right = this.canvas.getBoundingClientRect().width;
+        this.bottom = this.canvas.getBoundingClientRect().height;
         this.scenes = scenes;
         this.currentScene = scenes[0];
         return new Proxy(this, contactProxyHandlers);
@@ -45,6 +49,14 @@ class Game {
         // Renders sprites to the current Scene
         this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.currentScene.render(this.canvas);
+    }
+    none(){
+
+    }
+    onStep(onstep, stepsPerSecond = 60){
+        let that = setInterval(()=>{
+            onstep();
+        }, 1000/stepsPerSecond);
     }
 }
 
@@ -86,10 +98,7 @@ class Scene {
     }
 
     render(canvas) {
-        console.log(this.spritesPrivateLater)
         let ctx = canvas.getContext("2d");
-        console.log("Canvas ctx:")
-        console.log(ctx)
         this.spritesPrivateLater.forEach((sprite) => {
             sprite.drawSprite(ctx);
         })
@@ -115,9 +124,6 @@ class Sprite {
 
 class Rectangle extends Sprite {
     constructor(x, y, width, height, fillColor = "black", isFilled = true, strokeColor = null) {
-        console.log(fillColor)
-        console.log(isFilled)
-        console.log(strokeColor)
         super("rectangle", x, y, fillColor);
         this.width = width;
         this.height = height;
@@ -126,21 +132,28 @@ class Rectangle extends Sprite {
         this.lineWidth = 1.0;
         this.fillColor = fillColor;
     }
+
+    setLineWidth(lineWidth = 1.0) {
+        this.lineWidth = lineWidth
+        return this;
+    }
     
+    updateShape(){
+        this.left = this.x;
+        this.top = this.y;
+        this.right = this.x+this.width;
+        this.bottom = this.y+this.height;
+    }
+
     drawSprite(ctx) {
-        let arr = [this.x, this.y, this.width, this.height, this.lineWidth,this.fillColor, this.strokeColor, this.isFilled, this.strokeColor!=null]
-        console.log("Properties: " + arr.join(", "))
+        this.updateShape();
         ctx.beginPath();
-        console.log("rectangle")
-        console.log(this.strokeColor!=null ? this.strokeColor : "rgba(0,0,0,0)");
         ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
         ctx.strokeStyle = this.strokeColor!=null ? this.strokeColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
         ctx.rect(this.x, this.y, this.width, this.height);
         ctx.fill();
         ctx.stroke();
-        arr = [this.x, this.y, this.width, this.height, this.lineWidth, this.fillColor, this.strokeColor, this.isFilled, this.strokeColor!=null]
-        console.log("Properties: " + arr.join(", "))
         ctx.closePath();
     }
 }
