@@ -139,6 +139,7 @@ class Scene {
 
 }
 
+
 // declaration for the Sprite object (only serves as a superclass and does not work as a sprite of its own)
 class Sprite {
 
@@ -206,20 +207,24 @@ class Polygon extends Sprite{
     constructor(x, y, pointsList, fillColor = "black", isFilled = true, strokeColor = null){
         super("polygon", x, y, fillColor)
         this.points = pointsList; // 2d array [[50,200],[75,220]]
+        this.isFilled = isFilled;
+        this.strokeColor = strokeColor;
     }
 
     drawSprite(ctx){
         if(this.points.length>=1){
             ctx.beginPath();
-            ctx.moveTo (this.points[0][0], this.points[0][1]);          
+            ctx.moveTo(this.points[0][0], this.points[0][1]);          
 
             for (var i = 1; i < this.points.length; i++) {
-                ctx.lineTo (this.points[i][0], this.points[i][1]);
+                ctx.lineTo(this.points[i][0], this.points[i][1]);
             }
             ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
             ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
             ctx.lineWidth = this.lineWidth;
             ctx.stroke();
+            ctx.fill();
+            ctx.closePath();
         }
     }
 }
@@ -261,20 +266,27 @@ class RegularPolygon extends Circle{
     constructor(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
         super(x, y, radius, fillColor, isFilled, strokeColor);
         this.sides = sides;
+        this.points = [];
+        this.polyRotation = -Math.PI/2;
     }
     
     drawSprite(ctx){
-
+        let temp = [];
         ctx.beginPath();
-        ctx.moveTo (this.x +  this.radius * Math.cos(0), this.y +  this.radius *  Math.sin(0));          
+        ctx.moveTo (this.x +  this.radius * Math.cos(0+this.polyRotation), this.y +  this.radius *  Math.sin(0+this.polyRotation));          
+        temp.push([this.x +  this.radius * Math.cos(0+this.polyRotation), this.y +  this.radius *  Math.sin(0+this.polyRotation)])
 
         for (var i = 1; i <= this.sides;i += 1) {
-        ctx.lineTo (this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides));
+            ctx.lineTo (this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation));
+            temp.push([this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation)])
         }
         ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
         ctx.stroke();
+        ctx.fill();
+        this.points = temp;
+        ctx.closePath();
     }
 }
 
