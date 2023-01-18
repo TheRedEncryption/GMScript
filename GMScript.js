@@ -268,6 +268,18 @@ class RegularPolygon extends Circle{
         this.sides = sides;
         this.points = [];
         this.polyRotation = -Math.PI/2;
+        this.lineRounding = "miter";
+    }
+
+    setLineRounding(lineRounding = "miter"){
+        let validStrings = ["miter", "round", "bevel"]
+        if(lineRounding in validStrings){
+            this.lineRounding = lineRounding;
+        }
+        else{
+            console.warn(`${lineRounding} is not a valid rounding property. Use "miter", "round", or "bevel"`)
+        }
+        return this;
     }
     
     drawSprite(ctx){
@@ -278,11 +290,12 @@ class RegularPolygon extends Circle{
         temp.push([this.x +  this.radius * Math.cos(0+this.polyRotation), this.y +  this.radius *  Math.sin(0+this.polyRotation)]);
         temp.push(temp[0]);
         temp.push(temp[1]);
-        console.log(temp);
         for (var i = 1; i <= this.sides;i += 1) {
             ctx.lineTo (this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation));
             temp.push([this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation)])
         }
+        ctx.lineTo (this.x + this.radius * Math.cos(2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(2 * Math.PI / this.sides+this.polyRotation));
+        ctx.lineJoin = this.lineRounding;
         ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
