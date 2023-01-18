@@ -5,6 +5,8 @@ window.console.font = function(url){
     originalConsole.log(text)
 }
 
+// console.font(url) insane
+
 // a regex that gets all the digits
 const rexAllDigits = /^\d+$/;
 
@@ -43,6 +45,7 @@ class Game {
         this.bottom = this.canvas.getBoundingClientRect().height;
         this.scenes = scenes;
         this.currentScene = scenes[0];
+        this.backgroundColor = "white";
         return new Proxy(this, contactProxyHandlers);
     }
 
@@ -64,40 +67,22 @@ class Game {
     // Renders sprites to the current Scene
     renderScene() {
         this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvas.getContext("2d").fillStyle = this.backgroundColor;
+        this.canvas.getContext("2d").fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.currentScene.render(this.canvas);
     }
-    /* NOT WORKING
-    addGoogleFont(keyword = "", link = "") {
-        if (keyword=="" || link==""){
-            return console.error(`Keyword or link is empty... addGoogleFont(${keyword}, ${link})`)
-        }
-        if(keyword.length<=3){
-            return console.error(`Keyword is too short... addGoogleFont(${keyword}, ${link})`)
-        }
-        if(keyword.includes(" ") || keyword.includes("\n") || keyword.includes("    ") || keyword.includes("‎")){
-            return console.error(`Keyword can't have whitespace or new lines... addGoogleFont(${keyword}, ${link})`)
-        }
-        let myFont = new FontFace(
-            keyword,
-            `url(${link})`
-        );
-
-        myFont.load().then((font) => {
-            document.fonts.add(font);
-            console.log(font);
-            console.log("Successfully added")
-        }).catch(()=>{
-            console.log("Failed to add")
-        });
-        return myFont;
-    }
-    */
 
     // onStep
     onStep(onstep, stepsPerSecond = 60) {
         let that = setInterval(() => {
             onstep();
         }, 1000 / stepsPerSecond);
+    }
+
+    // sets the background color to any HTML5 supported color
+    setBackgroundColor(color){
+        this.backgroundColor = color;
+        return this;
     }
 }
 
@@ -158,7 +143,7 @@ class Scene {
 class Sprite {
 
     // list of acceptable types, can be expanded later
-    #acceptableTypes = ["rect", "rectangle", "circle", "text", "line"];
+    #acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon"];
 
     // constructor for such
     constructor(type, x, y, color) {
@@ -187,31 +172,17 @@ class Sprite {
         console.log("sprite")
     }
 
+    // moves the sprite in the number of pixels based on its current direction
     move(numberOfPixels) {
-        this.x += cos(this.rotation)
-        this.y += sin(this.rotation)
+        this.x -= Math.cos((this.rotation + (Math.PI / 2))) * numberOfPixels;
+        this.y -= Math.sin((this.rotation + (Math.PI / 2))) * numberOfPixels;
     }
+
     // sets the line width
     setLineWidth(lineWidth = 1.0) {
         this.lineWidth = lineWidth
         return this;
     }
-}
-
-// rectangle class
-class Rectangle extends Sprite {
-    constructor(x, y, width, height, fillColor = "black", isFilled = true, strokeColor = null) {
-        super("rectangle", x, y, fillColor);
-        this.width = width;
-        this.height = height;
-        this.isFilled = isFilled;
-        this.strokeColor = strokeColor;
-        this.left = this.x;
-        this.top = this.y;
-        this.right = this.x + this.width;
-        this.bottom = this.y + this.height;
-    }
-
 
     setLeft(pixels) {
         this.left = pixels;
@@ -229,69 +200,30 @@ class Rectangle extends Sprite {
         this.bottom = pixels;
         this.y = this.bottom - this.height;
     }
+}
 
-    // updates the left, top, right, and bottom values to be used
-    updateShape() {
-        this.left = this.x;
-        this.top = this.y;
-        this.right = this.x + this.width;
-        this.bottom = this.y + this.height;
+class Polygon extends Sprite{
+    constructor(x, y, pointsList, fillColor = "black", isFilled = true, strokeColor = null){
+        super("polygon", x, y, fillColor)
+        this.points = pointsList; // 2d array [[50,200],[75,220]]
     }
 
-    // the Rectangle's drawSprite() function
-    drawSprite(ctx) {
-        this.updateShape();
-        ctx.beginPath();
-        ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
-        ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
-        ctx.lineWidth = this.lineWidth;
-        ctx.rect(this.x, this.y, this.width, this.height);
-        ctx.fill();
-        ctx.stroke();
-        ctx.closePath();
+    drawSprite(ctx){
+        if(this.points.length>=1){
+            ctx.beginPath();
+            ctx.moveTo (this.points[0][0], this.points[0][1]);          
+
+            for (var i = 1; i < this.points.length; i++) {
+                ctx.lineTo (this.points[i][0], this.points[i][1]);
+            }
+            ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
+            ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
+            ctx.lineWidth = this.lineWidth;
+            ctx.stroke();
+        }
     }
 }
 
-// image sprite (lets you use images as sprites)
-class ImageSprite extends Rectangle {
-    constructor(image, x, y, width = 0, height = 0) {
-
-        super(x, y, 0, 0, "black", false);
-        this.image = new Image();
-        this.image.src = image;
-        this.width = this.image.width;
-        this.height = this.image.height;
-    }
-
-    drawSprite(ctx) {
-        this.updateShape();
-        //ctx.drawImage(this.image, this.x, this.y);
-        this.rotate(ctx);
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(0,0,0,100)";
-        ctx.strokeStyle = "rgba(0,0,0,0)";
-        ctx.lineWidth = 1;
-        ctx.rect(this.x, this.y, this.width, this.height);
-        ctx.fill();
-        ctx.stroke();
-        ctx.closePath();
-    }
-
-    // saves the canvas, translates, rotates, draws, and then restores
-    rotate(ctx) {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation);
-        ctx.drawImage(this.image, 0 - this.width / 2, 0 - this.height / 2, this.width, this.height);
-        ctx.restore();
-    }
-
-    updateShape() {
-        super.updateShape();
-        this.width = this.image.width;
-        this.height = this.image.height;
-    }
-}
 
 class Circle extends Sprite {
     /* Circle(centerX, centerY, radius, fill='black', border=None,
@@ -322,6 +254,105 @@ class Circle extends Sprite {
         ctx.fill();
         ctx.stroke();
         ctx.closePath();
+    }
+}
+
+class RegularPolygon extends Circle{
+    constructor(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
+        super(x, y, radius, fillColor, isFilled, strokeColor);
+        this.sides = sides;
+    }
+    
+    drawSprite(ctx){
+
+        ctx.beginPath();
+        ctx.moveTo (this.x +  this.radius * Math.cos(0), this.y +  this.radius *  Math.sin(0));          
+
+        for (var i = 1; i <= this.sides;i += 1) {
+        ctx.lineTo (this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides));
+        }
+        ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
+        ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
+        ctx.lineWidth = this.lineWidth;
+        ctx.stroke();
+    }
+}
+
+// rectangle class
+class Rectangle extends Sprite {
+    constructor(x, y, width, height, fillColor = "black", isFilled = true, strokeColor = null) {
+        super("rectangle", x, y, fillColor);
+        this.width = width;
+        this.height = height;
+        this.isFilled = isFilled;
+        this.strokeColor = strokeColor;
+        this.left = this.x;
+        this.top = this.y;
+        this.right = this.x + this.width;
+        this.bottom = this.y + this.height;
+    }
+
+    // updates the left, top, right, and bottom values to be used
+    updateShape() {
+        this.left = this.x;
+        this.top = this.y;
+        this.right = this.x + this.width;
+        this.bottom = this.y + this.height;
+    }
+
+    // the Rectangle's drawSprite() function
+    drawSprite(ctx) {
+
+        // updates the shape's properties
+        this.updateShape();
+        ctx.beginPath();
+        
+        // if not filled, or has a stroke color, then use transparent
+        ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
+        ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
+        
+        // set the line width
+        ctx.lineWidth = this.lineWidth;
+
+        // creates the rectangle, fills it, and then creates the stroke
+        ctx.rect(this.x, this.y, this.width, this.height);
+        ctx.fill();
+        ctx.stroke();
+
+        // end
+        ctx.closePath();
+    }
+}
+
+// image sprite (lets you use images as sprites)
+class ImageSprite extends Rectangle {
+    constructor(image, x, y, width = 0, height = 0) {
+
+        super(x, y, 0, 0, "black", false);
+        this.image = new Image();
+        this.image.src = image;
+        this.width = this.image.width;
+        this.height = this.image.height;
+    }
+
+    drawSprite(ctx) {
+        this.updateShape();
+        this.rotate(ctx);
+    }
+
+    updateShape() {
+        super.updateShape();
+        this.width = this.image.width;
+        this.height = this.image.height;
+    }
+
+    // saves the canvas, translates, rotates, draws, and then restores
+    rotate(ctx) {
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+        ctx.rotate(this.rotation);
+        ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.restore();
     }
 }
 
@@ -386,13 +417,17 @@ class Label extends Rectangle {
     }
 
     drawSprite(ctx) {
+        
         this.updateShape();
         ctx.beginPath();
+        
         ctx.font = this.fontStyle;
         ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
+        
         ctx.lineWidth = this.lineWidth;
         ctx.textAlign = this.hAlign;
+        
         ctx.fillText(this.textValue, this.x, this.y+this.height);
         ctx.strokeText(this.textValue, this.x, this.y+this.height);
         ctx.closePath();
