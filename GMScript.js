@@ -1,3 +1,10 @@
+originalConsole = window.console;
+window.console.font = function(url){
+    split = url.split("/")
+    text = "<style>\n\t@import url('https://fonts.googleapis.com/css2?family=" + split[split.length-1] + "&display=swap');\n</style>"
+    originalConsole.log(text)
+}
+
 // a regex that gets all the digits
 const rexAllDigits = /^\d+$/;
 
@@ -59,6 +66,7 @@ class Game {
         this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.currentScene.render(this.canvas);
     }
+    /* NOT WORKING
     addGoogleFont(keyword = "", link = "") {
         if (keyword=="" || link==""){
             return console.error(`Keyword or link is empty... addGoogleFont(${keyword}, ${link})`)
@@ -83,6 +91,7 @@ class Game {
         });
         return myFont;
     }
+    */
 
     // onStep
     onStep(onstep, stepsPerSecond = 60) {
@@ -344,19 +353,35 @@ class Label extends Rectangle {
         if(typeof font == "string"){
             this.font = font;
             this.fontSize = fontSize;
-            this.fontStyle = `${fontSize}px "${font}"`
+            this.fontStyle = `${fontSize}px "${this.font}"`
             let canvas = document.createElement("canvas");
             let ctx = canvas.getContext('2d');
-            ctx.font = `${fontSize}px "${font}"`;
+            ctx.font = `${fontSize}px "${this.font}"`;
             let metrics = ctx.measureText(this.textValue);
             let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
             this.width = metrics.width;
             this.height = actualHeight;
         }
+
+        /* NOT WORKING
         else if(font instanceof FontFace)
         {
-            
+            font.load().then((font)=>{
+                document.fonts.add(font)
+                this.font = font.family;
+                console.error(font)
+                this.fontSize = fontSize;
+                this.fontStyle = `${fontSize}px "${this.font}"`
+                let canvas = document.createElement("canvas");
+                let ctx = canvas.getContext('2d');
+                ctx.font = `${fontSize}px "${this.font}"`;
+                let metrics = ctx.measureText(this.textValue);
+                let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+                this.width = metrics.width;
+                this.height = actualHeight;
+            })
         }
+        */
         return this;
     }
 
@@ -368,7 +393,6 @@ class Label extends Rectangle {
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
         ctx.textAlign = this.hAlign;
-        console.warn(ctx.font);
         ctx.fillText(this.textValue, this.x, this.y+this.height);
         ctx.strokeText(this.textValue, this.x, this.y+this.height);
         ctx.closePath();
