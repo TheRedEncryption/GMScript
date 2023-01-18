@@ -7,7 +7,7 @@ let scene = game[0];
 let polygon = new Polygon(300,100,[[0,0],[300,300],[300,500],[0,500]]);
 scene.addSprite(polygon);
 
-let testingBuddy = new Circle(500,550,50,"teal",true,"navy").setLineWidth(15);
+let testingBuddy = new Circle(500,100,50,"teal",true,"navy").setLineWidth(15);
 testingBuddy.name = "Swift" // YIPPEEEEEEEEEE
 scene.addSprite(testingBuddy);
 
@@ -19,7 +19,7 @@ console.font("https://fonts.google.com/noto/specimen/Noto+Serif+Toto")
 let image = new ImageSprite("./direwarning.png", 100, 100);
 scene.addSprite(image);
 
-let regPoly = new RegularPolygon(300,100,100,10,"navy", true, "rgb(0,50,137)").setLineWidth(25);
+let regPoly = new RegularPolygon(300,200,100,3,"navy", true, "rgb(0,50,137)").setLineWidth(25);
 scene.addSprite(regPoly)
 
 
@@ -28,7 +28,7 @@ game.renderScene();
 scene.addSprite(new Circle(regPoly.points[0][0], regPoly.points[0][1], 7, "gold", true, "black")); // regPoly "focus" point
 let direction = 1;
 let directiony = 1;
-let speed = 5;
+let speed = 30;
 
 game.onStep(()=>{
 
@@ -46,6 +46,10 @@ game.onStep(()=>{
     if(image.bottom < 0){
         image.setTop(600);
         speed += 2;
+    }
+    if(image.top > 600){
+        image.setBottom(0);
+        speed+=2;
     }
     if(image.right < 0){
         image.setLeft(600);

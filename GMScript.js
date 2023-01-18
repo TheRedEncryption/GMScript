@@ -271,11 +271,14 @@ class RegularPolygon extends Circle{
     }
     
     drawSprite(ctx){
+        this.updateShape();
         let temp = [];
         ctx.beginPath();
         ctx.moveTo (this.x +  this.radius * Math.cos(0+this.polyRotation), this.y +  this.radius *  Math.sin(0+this.polyRotation));          
-        temp.push([this.x +  this.radius * Math.cos(0+this.polyRotation), this.y +  this.radius *  Math.sin(0+this.polyRotation)])
-
+        temp.push([this.x +  this.radius * Math.cos(0+this.polyRotation), this.y +  this.radius *  Math.sin(0+this.polyRotation)]);
+        temp.push(temp[0]);
+        temp.push(temp[1]);
+        console.log(temp);
         for (var i = 1; i <= this.sides;i += 1) {
             ctx.lineTo (this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation));
             temp.push([this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation)])
