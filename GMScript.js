@@ -81,6 +81,7 @@ class Game {
         }).catch(()=>{
             console.log("Failed to add")
         });
+        return myFont;
     }
 
     // onStep
@@ -317,28 +318,45 @@ class Circle extends Sprite {
 
 class Label extends Rectangle {
     //x, y, width, height, fillColor = "black", isFilled = true, strokeColor = null
-    constructor(textValue, x, y, font = 'arial', fontSize = 12, fillColor = "black", isFilled = true, strokeColor = null) {
+    constructor(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null) {
         let canvas = document.createElement("canvas");
         let ctx = canvas.getContext('2d');
-        ctx.font = `${fontSize}px ${font}`;
+        ctx.font = `12px "arial"`;
         let metrics = ctx.measureText(textValue);
         let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         super(x,y,metrics.width,actualHeight,fillColor,isFilled,strokeColor);
-        this.fontSize = fontSize;
-        this.font = font;
-        this.fontStyle = `${fontSize}px ${font}`
+        this.fontSize = 12;
+        this.font = "arial";
+        this.fontStyle = `12px "arial"`
         this.textValue = textValue;
         this.hAlign = "left";
         this.vAlign = "top";
     }
 
-    // setFont has to update the width and height and fontsize and fontstyle
-    setProperties(horizontalAlignment="left", verticalAlignment="top", font = this.font, fontSize = this.fontSize){
-        this.font = font;
-        this.fontSize = fontSize;
-        this.fontStyle = `${fontSize}px ${font}`
+    setAlignment(horizontalAlignment="left", verticalAlignment="top"){
         this.hAlign = horizontalAlignment;
         this.vAlign = verticalAlignment;
+        return this;
+    }
+    
+    // setFont has to update the width and height and fontsize and fontstyle
+    setFont(font = null, fontSize = this.fontSize){
+        if(typeof font == "string"){
+            this.font = font;
+            this.fontSize = fontSize;
+            this.fontStyle = `${fontSize}px "${font}"`
+            let canvas = document.createElement("canvas");
+            let ctx = canvas.getContext('2d');
+            ctx.font = `${fontSize}px "${font}"`;
+            let metrics = ctx.measureText(this.textValue);
+            let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+            this.width = metrics.width;
+            this.height = actualHeight;
+        }
+        else if(font instanceof FontFace)
+        {
+            
+        }
         return this;
     }
 
@@ -350,12 +368,9 @@ class Label extends Rectangle {
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
         ctx.textAlign = this.hAlign;
-        if(this.isFilled){
-            ctx.fillText(this.textValue, this.x, this.y+this.height);
-        }
-        else if(this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)" != "rgba(0,0,0,0)"){
-            ctx.strokeText(this.textValue, this.x, this.y+this.height);
-        }
+        console.warn(ctx.font);
+        ctx.fillText(this.textValue, this.x, this.y+this.height);
+        ctx.strokeText(this.textValue, this.x, this.y+this.height);
         ctx.closePath();
     }
 
