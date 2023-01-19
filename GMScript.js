@@ -86,7 +86,6 @@ class Game {
     }
 }
 
-
 class Scene {
     // Realistically a Scene has no default sprites
     spritesPrivateLater;
@@ -123,6 +122,31 @@ class Scene {
         }
     }
 
+    #containsObject(obj, list) {
+        var i;
+        for (i = 0; i < list.length; i++) {
+            if (list[i] === obj) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    addGroup(group){
+        group.sprites.forEach((sprite)=>{
+            if((this.#containsObject(sprite, this.spritesPrivateLater))){
+                let index = this.spritesPrivateLater.indexOf(sprite);
+                if (index > -1) { // only splice array when item is found
+                    let deletedSprite = this.spritesPrivateLater.splice(index, 1); // 2nd parameter means remove one item only
+                }
+            }
+            else{
+                
+            }
+        })
+        this.spritesPrivateLater.push(group)
+    }
+
     // lets you add a rectangle
     addRect(x, y, width, height, color = "black", isFilled = true, strokeColor = null) {
         if (!x || !y || !width || !height) { throw new Error("addRect requires (x, y, width, height) arguments") }
@@ -139,6 +163,106 @@ class Scene {
 
 }
 
+class Group {
+    constructor(...args){
+        if(!Array.isArray(args)){
+            return console.error("Args is not an array")
+        }
+        let minX;
+        let maxX;
+        let minY;
+        let maxY;
+        // BUG/ISSUE : THIS NEEDS ANOTHER FOR LOOP FOR EACH SPRITE
+        // LOOP THROUGH THE TOP LEFT BOTTOM AND RIGHT VALUE TO GET MIN AND MAX
+        args.forEach((arg)=>{
+            if(!(arg instanceof Sprite)){
+                return console.error(`One of the args is not a sprite... ${arg}`)
+            }
+            if(minX==undefined){minX=arg.x}
+            if(maxX==undefined){maxX=arg.x+arg.width}
+            if(arg.x<minX){minX=arg.x}            
+            if(arg.x+arg.width>maxX){maxX=arg.x+arg.width}            
+            if(minY==undefined){minY=arg.y}
+            if(maxY==undefined){maxY=arg.y+arg.height}
+            if(arg.y<minY){minY=arg.y}            
+            if(arg.y+arg.height>maxY){maxY=arg.y+arg.height}           
+        })
+        this.x = minX;
+        this.prevX = this.x;
+        this.width = maxX-minX;
+        this.y = minY;
+        this.prevY = this.y;
+        this.height = maxY-minY;
+        this.sprites = args;
+    }
+
+    addSprite(sprite){
+        let minX;
+        let maxX;
+        let minY;
+        let maxY;
+        this.sprites.forEach((arg)=>{
+            if(!(arg instanceof Sprite)){
+                return console.error(`One of the args is not a sprite... ${arg}`)
+            }
+            if(minX==undefined){minX=arg.x}
+            if(maxX==undefined){maxX=arg.x+arg.width}
+            if(arg.x<minX){minX=arg.x}            
+            if(arg.x+arg.width>maxX){maxX=arg.x+arg.width}            
+            if(minY==undefined){minY=arg.y}
+            if(maxY==undefined){maxY=arg.y+arg.height}
+            if(arg.y<minY){minY=arg.y}            
+            if(arg.y+arg.height>maxY){maxY=arg.y+arg.height}           
+        })
+        this.x = minX;
+        this.prevX = this.x;
+        this.width = maxX-minX;
+        this.y = minY;
+        this.prevY = this.y;
+        this.height = maxY-minY;
+        this.sprites.push(sprite);
+    }
+    
+    setLeft(pixels) {
+        this.left = pixels;
+        this.x = this.left;
+    }
+    setTop(pixels) {
+        this.top = pixels;
+        this.y = this.top;
+    }
+    setRight(pixels) {
+        this.right = pixels;
+        this.x = this.right - this.width;
+    }
+    setBottom(pixels) {
+        this.bottom = pixels;
+        this.y = this.bottom - this.height;
+    }
+    
+    updateGroup(){
+        this.left = this.x;
+        this.right = this.x + this.width;
+        this.top = this.y;
+        this.bottom = this.y + this.height;
+        this.sprites.forEach((sprite)=>{
+            let deltaX = this.x - this.prevX;
+            let deltaY = this.y-this.prevY;
+            sprite.x += deltaX;
+            sprite.y += deltaY;
+            //console.log(sprite.x, sprite.y, sprite.fillColor)
+        })
+        this.prevX = this.x;
+        this.prevY = this.y;
+    }
+
+    drawSprite(ctx){
+        this.updateGroup();
+        this.sprites.forEach((sprite)=>{
+            sprite.drawSprite(ctx);
+        })
+    }
+}
 
 // declaration for the Sprite object (only serves as a superclass and does not work as a sprite of its own)
 class Sprite {
@@ -204,20 +328,55 @@ class Sprite {
 }
 
 class Polygon extends Sprite{
-    constructor(x, y, pointsList, fillColor = "black", isFilled = true, strokeColor = null){
-        super("polygon", x, y, fillColor)
+    constructor(pointsList, fillColor = "black", isFilled = true, strokeColor = null){
+        super("polygon", 0, 0, fillColor)
         this.points = pointsList; // 2d array [[50,200],[75,220]]
         this.isFilled = isFilled;
         this.strokeColor = strokeColor;
+        let minMax = this.#findMinandMax(); let minArr = minMax[0]; let maxArr = minMax[1];
+        this.x = minArr[0];
+        this.y = minArr[1];
+        this.width = this.x + maxArr[0] - minArr[0]
+        this.height = this.y + maxArr[1] - minArr[1]
+    }
+
+    #findMinandMax(){
+        let array2d = this.points;
+        let minX;
+        let maxX;
+        let minY;
+        let maxY;
+        array2d.forEach((arg)=>{
+            if(minX==undefined){minX=arg[0]}
+            if(maxX==undefined){maxX=arg[0]}
+            if(minY==undefined){minY=arg[1]}
+            if(maxY==undefined){maxY=arg[1]}
+            if(arg[0]<minX){minX=arg[0]}            
+            if(arg[0]>maxX){maxX=arg[0]}            
+            if(arg[1]<minY){minY=arg[1]}            
+            if(arg[1]>maxY){maxY=arg[1]}            
+        })
+        //this.x = minX;
+        //this.width = maxX-minX;
+        //this.y = minY;
+        //this.height = maxY-minY;
+        return [[minX,minY],[maxX,maxY]];
+    }
+
+    move2d(distanceX = 0, distanceY = 0){
+        this.points.forEach((point)=>{
+            point[0]+=distanceX;
+            point[1]+=distanceY;
+        })
     }
 
     drawSprite(ctx){
         if(this.points.length>=1){
             ctx.beginPath();
-            ctx.moveTo(this.points[0][0], this.points[0][1]);          
+            ctx.moveTo(this.points[0][0], this.points[0][1]+this.y);          
 
             for (var i = 1; i < this.points.length; i++) {
-                ctx.lineTo(this.points[i][0], this.points[i][1]);
+                ctx.lineTo(this.points[i][0], this.points[i][1]+this.y);
             }
             ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
             ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
@@ -247,6 +406,8 @@ class Circle extends Sprite {
         this.top = this.y - this.radius / 2 - this.lineWidth;
         this.right = this.x + this.radius / 2 + this.lineWidth;
         this.bottom = this.y + this.radius / 2 + this.lineWidth;
+        this.height=this.radius*2;
+        this.width=this.radius*2;
     }
 
     drawSprite(ctx) {
@@ -273,11 +434,12 @@ class RegularPolygon extends Circle{
 
     setLineRounding(lineRounding = "miter"){
         let validStrings = ["miter", "round", "bevel"]
-        if(lineRounding in validStrings){
+        if(validStrings.includes(lineRounding)){
             this.lineRounding = lineRounding;
         }
         else{
-            console.warn(`${lineRounding} is not a valid rounding property. Use "miter", "round", or "bevel"`)
+            console.warn(`${lineRounding} is not a valid rounding property. Use "miter", "round", or "bevel"...`)
+            console.warn(this)
         }
         return this;
     }
