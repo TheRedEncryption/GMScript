@@ -1,5 +1,7 @@
-let game = new Game()
+//!SECTION asas
 
+let game = new Game()
+console.log(game[0]);
 let scene = game[0];
 
 // Suprisingly the layer of each of them is based on the order they are rendered in even after clearing and drawing again
@@ -32,7 +34,6 @@ console.font("https://fonts.google.com/noto/specimen/Noto+Serif+Toto")
 
 let direWarning = new Image()
 direWarning.src = "./direwarning.png"
-// TEST THIS \/ EVENTUALLY WITH ^
 let image = new ImageSprite([direWarning,"./info.png","./warning.png"], 100, 100);
 scene.addSprite(image);
 
@@ -42,22 +43,24 @@ scene.addSprite(image2);
 let regPoly = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineWidth(25).setLineRounding("round");
 scene.addSprite(regPoly)
 
+//scene.setGravity() // create floor for this later
 
 game.renderScene();
 
 scene.addSprite(new Circle(regPoly.points[0][0], regPoly.points[0][1], 7, "gold", true, "black")); // regPoly "focus" point
-let regPoly2 = new RegularPolygon(300,500,50,5,"orange", true, "rgb(137,50,0)").setLineWidth(25).setLineRounding("round");
-scene.addSprite(regPoly2)
+
+let theREMOVALRECT = scene.addRectangle(100,100,300,300,"orange").setLineWidth(20).setLineRounding("round")
+
 let direction = 1;
 let directiony = 1;
-let speed = 1;
+var speed = 3;
 let speed2 = 10;
 let speed3 = 20;
 let gravity = 1.1;
 
 game.onStep(()=>{
 
-    regPoly2.sides= Math.round(speed);
+    regPoly2.sides = Math.round(speed);
     speed2+=gravity
     testingSussy.y+=speed2;
     testingSussy.x+=speed3;
@@ -77,9 +80,10 @@ game.onStep(()=>{
     
     //polyGroup.x-=5;
     regPoly2.y+=5;
-    
-    if(regPoly2.top>game.bottom){
-        regPoly2.setBottom(game.top)
+    game2.renderScene();
+
+    if(regPoly2.top>game2.bottom){
+        regPoly2.setBottom(game2.top)
     }
     if(polyGroup.right<game.left){
         polyGroup.setLeft(game.right)
@@ -103,7 +107,7 @@ game.onStep(()=>{
     if(image.top > 600){
         image.setBottom(0);
         speed*=1.1;
-
+        scene.remove(theREMOVALRECT);
         image.costumeNumber += 1;
     }
 

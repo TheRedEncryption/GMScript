@@ -42,15 +42,17 @@ const contactProxyHandlers = {
  * https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
  */ 
 class Game {
-    constructor(canvas = null, scenes = this.createScene()) {
+    constructor(canvas = null, scenes = null) {
         this.canvas = canvas != null ? canvas : this.createCanvas();
         this.left = 0;
         this.top = 0;
         this.right = this.canvas.getBoundingClientRect().width;
         this.bottom = this.canvas.getBoundingClientRect().height;
-        this.scenes = scenes;
-        this.currentScene = scenes[0];
+        this.scenes = [];
+        this.createScene();
+        this.currentScene = this.scenes[0];
         this.backgroundColor = "white";
+        
         return new Proxy(this, contactProxyHandlers);
     }
 
@@ -66,7 +68,10 @@ class Game {
 
     // returns a new scene inside of an array
     createScene() {
-        return [new Scene()];
+        let temp = new Scene();
+        temp.parentGame = this;
+        this.scenes.push(temp);
+        return temp;
     }
 
     // Renders sprites to the current Scene
@@ -82,6 +87,7 @@ class Game {
         let that = setInterval(() => {
             onstep();
         }, 1000 / stepsPerSecond);
+        return that;
     }
 
     // sets the background color to any HTML5 supported color
@@ -141,6 +147,9 @@ class Scene {
     constructor(sprites) {
         if (!Array.isArray(sprites) && sprites != undefined) { throw Error(`${sprites} is not an Array`) }
         this.spritesPrivateLater = Array.isArray(sprites) ? sprites : [];
+        this.gravityVal = 0;
+        this.sceneSpeed = 0;
+        this.floorLevel = -1;
     }
 
     // Add a sprite to the sprites collection.
@@ -171,7 +180,7 @@ class Scene {
             addSpritePredefined(arguments[0])
         }
     }
-
+    
     // Checks if a list contains an object.
     #containsObject(obj, list) {
         var i;
@@ -182,7 +191,18 @@ class Scene {
         }
         return false;
     }
-
+    
+    remove(sprite){
+        if((this.#containsObject(sprite, this.spritesPrivateLater))){
+            let index = this.spritesPrivateLater.indexOf(sprite);
+            if (index > -1) { // only splice array when item is found
+                this.spritesPrivateLater.splice(index, 1); // 2nd parameter means remove one item only
+            }
+            else{
+                return console.warn("Sprite was not found in the sprites array for this scene... " + sprite)
+            }
+        }
+    }
 
     // Add a group to the game object.
     addGroup(group){
@@ -193,9 +213,6 @@ class Scene {
                 if (index > -1) { // only splice array when item is found
                     this.spritesPrivateLater.splice(index, 1); // 2nd parameter means remove one item only
                 }
-            }
-            else{
-                
             }
         })
         this.spritesPrivateLater.push(group)
@@ -243,16 +260,29 @@ class Scene {
 
     // Adds a label to the sprites.
     addLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
-        if (!textValue || !x || !y) { throw new Error("addLabel requires (textValue, x, y) arguments") }
+        if (!textValue || x==undefined || y==undefined) { throw new Error(`addLabel requires (textValue, x, y) arguments... ${textValue}, ${x}, ${y}`) }
         let temp = new Label(textValue, x, y, fillColor, isFilled, strokeColor);
         this.spritesPrivateLater.push(temp);
         return temp;
+    }
+
+    setGravity(gravityVal=0.3, sceneSpeed = 0, floorLevel = -1){
+        this.gravityVal = gravityVal;
+        this.sceneSpeed = sceneSpeed;
+        this.floorLevel = this.createFloor();
+    }
+
+    createFloor(){
+        return 0;
     }
     
     // render function that draws all the sprites inside of each scene
     render(canvas) {
         let ctx = canvas.getContext("2d");
+        this.sceneSpeed += this.gravityVal;
         this.spritesPrivateLater.forEach((sprite) => {
+            sprite.y+=this.sceneSpeed;
+            sprite.floorLevel = this.floorLevel;
             sprite.drawSprite(ctx);
         })
     }
@@ -376,6 +406,8 @@ class Sprite {
         this.rotation = 0;
         this.scale = 1.0;
         this.lineWidth = 1.0;
+        this.floorLevel = false;
+        this.lineRounding = "miter";
     }
 
     // converts degree input to radian (unless second parameter is false)
@@ -401,6 +433,18 @@ class Sprite {
     // sets the line width
     setLineWidth(lineWidth = 1.0) {
         this.lineWidth = lineWidth
+        return this;
+    }
+
+    setLineRounding(lineRounding = "miter"){
+        let validStrings = ["miter", "round", "bevel"]
+        if(validStrings.includes(lineRounding)){
+            this.lineRounding = lineRounding;
+        }
+        else{
+            console.warn(`${lineRounding} is not a valid rounding property. Use "miter", "round", or "bevel"...`)
+            console.warn(this)
+        }
         return this;
     }
 
@@ -524,19 +568,6 @@ class RegularPolygon extends Circle{
         this.sides = sides;
         this.points = [];
         this.polyRotation = -Math.PI/2;
-        this.lineRounding = "miter";
-    }
-
-    setLineRounding(lineRounding = "miter"){
-        let validStrings = ["miter", "round", "bevel"]
-        if(validStrings.includes(lineRounding)){
-            this.lineRounding = lineRounding;
-        }
-        else{
-            console.warn(`${lineRounding} is not a valid rounding property. Use "miter", "round", or "bevel"...`)
-            console.warn(this)
-        }
-        return this;
     }
     
     drawSprite(ctx){
@@ -618,31 +649,31 @@ class ImageSprite extends Rectangle {
     constructor(image, x, y, width = 0, height = 0) {
         super(x, y, 0, 0, "black", false);
 
-        this.images = [];
+        let tempImages = [];
         this.costumes = [];
         
         this.costumeNumber = 0;
 
         // creates an array out of a single image if not already an array
         if(!Array.isArray(image)){
-            this.images[0] = image;
+            tempImages[0] = image;
         }
         else{
-            this.images = image;
+            tempImages = image;
         }
 
-        for(let i = 0; i < this.images.length; i++){
+        for(let i = 0; i < tempImages.length; i++){
 
             // Constructs a new Image instance.
-            if(typeof this.images[i] == "string"){
+            if(typeof tempImages[i] == "string"){
                 let temp = new Image();
-                temp.src = this.images[i];
+                temp.src = tempImages[i];
                 this.costumes[i] = temp;
             }
             
             // Sets the image.
-            else if(this.images[i] instanceof Image){
-                this.costumes[i] = this.images[i];
+            else if(tempImages[i] instanceof Image){
+                this.costumes[i] = tempImages[i];
             }
         }
 
@@ -660,7 +691,7 @@ class ImageSprite extends Rectangle {
     // Updates the shape of the image.
     updateShape() {
         super.updateShape();
-        console.log(this.costumeNumber);
+        //console.log(this.costumeNumber);
         if(this.costumeNumber > this.costumes.length - 1){
             this.costumeNumber = 0;
         }
