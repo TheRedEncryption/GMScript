@@ -89,6 +89,50 @@ class Game {
         this.backgroundColor = color;
         return this;
     }
+
+    // Adds a new polygon to the sprites.
+    addPolygon(pointsList, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!pointsList) { throw new Error("addPolygon requires (pointsList) arguments") }
+        return this.currentScene.addPolygon(pointsList, fillColor, isFilled, strokeColor);
+    }
+    
+    // Add a circle to the sprites.
+    addCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!x || !y || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
+        return this.currentScene.addCircle(x, y, radius, fillColor, isFilled, strokeColor);
+    }
+    
+    // Adds a regular polygon to the sprites.
+    addRegularPolygon(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!x || !y || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
+        return this.currentScene.addRegularPolygon(x, y, radius, sides, fillColor, isFilled, strokeColor);
+    }
+
+    // lets you add a rectangle
+    addRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
+        if (!x || !y || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
+        return this.currentScene.addRectangle(x, y, width, height, color, isFilled, strokeColor);
+    }
+    
+    // Adds an image to the sprites.
+    addImage(image, x, y, width = 0, height = 0){
+        if (!image || !x || !y) { throw new Error("addImage requires (image, x, y) arguments") }
+        return this.currentScene.addImage(image, x, y, width, height);
+    }
+
+    // Adds a label to the sprites.
+    addLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
+        if (!textValue || !x || !y) { throw new Error("addLabel requires (textValue, x, y) arguments") }
+        return this.currentScene.addLabel(textValue, x, y, fillColor, isFilled, strokeColor);
+    }
+    
+    // render function that draws all the sprites inside of each scene
+    render(canvas) {
+        let ctx = canvas.getContext("2d");
+        this.spritesPrivateLater.forEach((sprite) => {
+            sprite.drawSprite(ctx);
+        })
+    }
 }
 
 class Scene {
@@ -504,8 +548,12 @@ class RegularPolygon extends Circle{
         temp.push(temp[0]);
         temp.push(temp[1]);
         for (var i = 1; i <= this.sides;i += 1) {
-            ctx.lineTo (this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation));
-            temp.push([this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation)])
+            
+            let tempX = this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation);
+            let tempY = this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation);
+
+            ctx.lineTo (tempX, tempY);
+            temp.push([tempX, tempY]);
         }
         ctx.lineTo (this.x + this.radius * Math.cos(2 * Math.PI / this.sides+this.polyRotation), this.y + this.radius * Math.sin(2 * Math.PI / this.sides+this.polyRotation));
         ctx.lineJoin = this.lineRounding;
@@ -568,23 +616,60 @@ class Rectangle extends Sprite {
 // image sprite (lets you use images as sprites)
 class ImageSprite extends Rectangle {
     constructor(image, x, y, width = 0, height = 0) {
-
         super(x, y, 0, 0, "black", false);
-        this.image = new Image();
-        this.image.src = image;
-        this.width = this.image.width;
-        this.height = this.image.height;
+
+        this.images = [];
+        this.costumes = [];
+        
+        this.costumeNumber = 0;
+
+        // creates an array out of a single image if not already an array
+        if(!Array.isArray(image)){
+            this.images[0] = image;
+        }
+        else{
+            this.images = image;
+        }
+
+        for(let i = 0; i < this.images.length; i++){
+
+            // Constructs a new Image instance.
+            if(typeof this.images[i] == "string"){
+                let temp = new Image();
+                temp.src = this.images[i];
+                this.costumes[i] = temp;
+            }
+            
+            // Sets the image.
+            else if(this.images[i] instanceof Image){
+                this.costumes[i] = this.images[i];
+            }
+        }
+
+        this.currentCostume = this.costumes[this.costumeNumber]
+        this.width = this.currentCostume.width;
+        this.height = this.currentCostume.height;
     }
 
+    // Draw a sprite.
     drawSprite(ctx) {
         this.updateShape();
         this.rotate(ctx);
     }
 
+    // Updates the shape of the image.
     updateShape() {
         super.updateShape();
-        this.width = this.image.width;
-        this.height = this.image.height;
+        console.log(this.costumeNumber);
+        if(this.costumeNumber > this.costumes.length - 1){
+            this.costumeNumber = 0;
+        }
+        else if(this.costumeNumber < 0){
+            this.costumeNumber = this.costumes.length - 1;
+        }
+        this.currentCostume = this.costumes[this.costumeNumber]
+        this.width = this.currentCostume.width;
+        this.height = this.currentCostume.height;
     }
 
     // saves the canvas, translates, rotates, draws, and then restores
@@ -592,7 +677,7 @@ class ImageSprite extends Rectangle {
         ctx.save();
         ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
         ctx.rotate(this.rotation);
-        ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.drawImage(this.currentCostume, -this.width / 2, -this.height / 2, this.width, this.height);
         ctx.restore();
     }
 }
@@ -614,6 +699,7 @@ class Label extends Rectangle {
         this.vAlign = "top";
     }
 
+    // Sets the alignment of the rectangle.
     setAlignment(horizontalAlignment="left", verticalAlignment="top"){
         this.hAlign = horizontalAlignment;
         this.vAlign = verticalAlignment;
@@ -635,7 +721,7 @@ class Label extends Rectangle {
             this.height = actualHeight;
         }
 
-        /* NOT WORKING
+        /* NOT WORKING cause im cringe
         else if(font instanceof FontFace)
         {
             font.load().then((font)=>{
