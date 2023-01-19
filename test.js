@@ -15,7 +15,8 @@ scene.addSprite(polygon2);
 let polyGroup = new Group(new Rectangle(275,500,100,100,"rgb(137,50,255)"), new Rectangle(250,400,100,100,"rgb(100,137,255)"), new Rectangle(225,300,100,100,"rgb(150,150,255)"))
 scene.addGroup(polyGroup);
 
-scene.addLabel("testing the scene methods",300,300,"orange",true,"rgb(117,85,0)").setFont("Noto Serif Toto", 50).setAlignment("center","center").setLineWidth(2)
+scene.addLabel("testing the scene things",300,300,"orange",true,"rgb(117,85,0)").setFont("Noto Serif Toto", 50).setAlignment("center","center").setLineWidth(2)
+scene.addLabel("right aligned",game.right,500,"black",true,"white").setFont("Noto Serif Toto", 50).setAlignment("right","center").setLineWidth(1)
 
 polyGroup.addSprite(new Rectangle(200,200,100,100,"cyan"))
 
@@ -27,8 +28,8 @@ let testingSussy = new Rectangle(150,50,50,50,"blue");
 scene.addSprite(testingSussy);
 
 
-let text = new Label("Text", 0, 0, "cyan", true, "black").setFont("Noto Serif Toto", 50).setAlignment("left","top")
-scene.addSprite(text)
+let atext = new Label("Text", 0, 0, "cyan", true, "black").setFont("Noto Serif Toto", 50).setAlignment("left","top")
+scene.addSprite(atext)
 console.font("https://fonts.google.com/noto/specimen/Noto+Serif+Toto")
 
 
@@ -39,6 +40,8 @@ scene.addSprite(image);
 
 let image2 = new ImageSprite([direWarning,"./info.png","./warning.png"], 50, 100);
 scene.addSprite(image2);
+image2.setScale(1.5);
+let theREMOVALRECT = scene.addRectangle(100,100,300,300,"orange").setLineWidth(20).setLineRounding("round")
 
 let regPoly = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineWidth(25).setLineRounding("round");
 scene.addSprite(regPoly)
@@ -49,7 +52,6 @@ game.renderScene();
 
 scene.addSprite(new Circle(regPoly.points[0][0], regPoly.points[0][1], 7, "gold", true, "black")); // regPoly "focus" point
 
-let theREMOVALRECT = scene.addRectangle(100,100,300,300,"orange").setLineWidth(20).setLineRounding("round")
 
 let direction = 1;
 let directiony = 1;
@@ -60,7 +62,7 @@ let gravity = 1.1;
 
 game.onStep(()=>{
 
-    regPoly2.sides = Math.round(speed);
+    //regPoly2.sides = Math.round(speed);
     speed2+=gravity
     testingSussy.y+=speed2;
     testingSussy.x+=speed3;
@@ -77,17 +79,19 @@ game.onStep(()=>{
         testingSussy.x-=speed3*2;
         speed3*=-0.1;
     }
-    
-    //polyGroup.x-=5;
-    regPoly2.y+=5;
-    game2.renderScene();
+    // you can use atext.textValue to do the same
+    atext.setText(Math.round(testingBuddy.bottom));
 
-    if(regPoly2.top>game2.bottom){
-        regPoly2.setBottom(game2.top)
-    }
-    if(polyGroup.right<game.left){
-        polyGroup.setLeft(game.right)
-    }
+    //polyGroup.x-=5;
+    //regPoly2.y+=5;
+    //game2.renderScene();
+
+    //if(regPoly2.top>game2.bottom){
+    //    regPoly2.setBottom(game2.top)
+    //}
+    //if(polyGroup.right<game.left){
+    //    polyGroup.setLeft(game.right)
+    //}
     
     game.renderScene(); // same as scene.render(HTMLCanvasElement)
     
