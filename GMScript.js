@@ -35,7 +35,12 @@ const contactProxyHandlers = {
     }
 };
 
-// class declaration for the Game object
+// Comment anchors extension in vscode
+/** ANCHOR - Game class
+ * Class declaration for the Game object
+ * TODO: add 3d canvas. The way we could do this is by, instead of getting 2d context, get webgl2 context which is for 3d
+ * https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
+ */ 
 class Game {
     constructor(canvas = null, scenes = this.createScene()) {
         this.canvas = canvas != null ? canvas : this.createCanvas();
@@ -94,6 +99,7 @@ class Scene {
         this.spritesPrivateLater = Array.isArray(sprites) ? sprites : [];
     }
 
+    // Add a sprite to the sprites collection.
     addSprite() {
         console.log(this.spritesPrivateLater)
         let self = this.spritesPrivateLater;
@@ -122,6 +128,7 @@ class Scene {
         }
     }
 
+    // Checks if a list contains an object.
     #containsObject(obj, list) {
         var i;
         for (i = 0; i < list.length; i++) {
@@ -132,12 +139,15 @@ class Scene {
         return false;
     }
 
+
+    // Add a group to the game object.
     addGroup(group){
+        if(!(group instanceof Group)){return console.error(`addGroup takes a Group object as input... ${group}`)}
         group.sprites.forEach((sprite)=>{
             if((this.#containsObject(sprite, this.spritesPrivateLater))){
                 let index = this.spritesPrivateLater.indexOf(sprite);
                 if (index > -1) { // only splice array when item is found
-                    let deletedSprite = this.spritesPrivateLater.splice(index, 1); // 2nd parameter means remove one item only
+                    this.spritesPrivateLater.splice(index, 1); // 2nd parameter means remove one item only
                 }
             }
             else{
@@ -146,13 +156,55 @@ class Scene {
         })
         this.spritesPrivateLater.push(group)
     }
-
-    // lets you add a rectangle
-    addRect(x, y, width, height, color = "black", isFilled = true, strokeColor = null) {
-        if (!x || !y || !width || !height) { throw new Error("addRect requires (x, y, width, height) arguments") }
-        this.spritesPrivateLater.push(new Rectangle(x, y, width, height, color, isFilled, strokeColor))
+    
+    // Adds a new polygon to the sprites.
+    addPolygon(pointsList, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!pointsList) { throw new Error("addPolygon requires (pointsList) arguments") }
+        let temp = new Polygon(pointsList, fillColor, isFilled, strokeColor);
+        this.spritesPrivateLater.push(temp);
+        return temp;
+    }
+    
+    // Add a circle to the sprites.
+    addCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!x || !y || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
+        let temp = new Circle(x, y, radius, fillColor, isFilled, strokeColor);
+        this.spritesPrivateLater.push(temp);
+        return temp;
+    }
+    
+    // Adds a regular polygon to the sprites.
+    addRegularPolygon(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!x || !y || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
+        let temp = new RegularPolygon(x, y, radius, sides, fillColor, isFilled, strokeColor);
+        this.spritesPrivateLater.push(temp);
+        return temp;
     }
 
+    // lets you add a rectangle
+    addRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
+        if (!x || !y || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
+        let temp = new Rectangle(x, y, width, height, color, isFilled, strokeColor);
+        this.spritesPrivateLater.push(temp);
+        return temp;
+    }
+    
+    // Adds an image to the sprites.
+    addImage(image, x, y, width = 0, height = 0){
+        if (!image || !x || !y) { throw new Error("addImage requires (image, x, y) arguments") }
+        let temp = new ImageSprite(image, x, y, width, height);
+        this.spritesPrivateLater.push(temp);
+        return temp;
+    }
+
+    // Adds a label to the sprites.
+    addLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
+        if (!textValue || !x || !y) { throw new Error("addLabel requires (textValue, x, y) arguments") }
+        let temp = new Label(textValue, x, y, fillColor, isFilled, strokeColor);
+        this.spritesPrivateLater.push(temp);
+        return temp;
+    }
+    
     // render function that draws all the sprites inside of each scene
     render(canvas) {
         let ctx = canvas.getContext("2d");
@@ -160,7 +212,6 @@ class Scene {
             sprite.drawSprite(ctx);
         })
     }
-
 }
 
 class Group {

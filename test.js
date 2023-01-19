@@ -13,6 +13,8 @@ scene.addSprite(polygon2);
 let polyGroup = new Group(new Rectangle(275,500,100,100,"rgb(137,50,255)"), new Rectangle(250,400,100,100,"rgb(100,137,255)"), new Rectangle(225,300,100,100,"rgb(150,150,255)"))
 scene.addGroup(polyGroup);
 
+scene.addLabel("testing the scene methods",300,300,"orange",true,"rgb(117,85,0)").setFont("Noto Serif Toto", 50).setAlignment("center","center").setLineWidth(2)
+
 polyGroup.addSprite(new Rectangle(200,200,100,100,"cyan"))
 
 let testingBuddy = new Circle(500,100,50,"teal",true,"navy").setLineWidth(15);
@@ -27,6 +29,9 @@ let text = new Label("Text", 0, 0, "cyan", true, "black").setFont("Noto Serif To
 scene.addSprite(text)
 console.font("https://fonts.google.com/noto/specimen/Noto+Serif+Toto")
 
+// FIXME - Image class can't go into ImageSprite
+// let direWarning = new Image()
+// direWarning.src = "./direwarning.png"
 let image = new ImageSprite("./direwarning.png", 100, 100);
 scene.addSprite(image);
 
