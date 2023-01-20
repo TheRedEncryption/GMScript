@@ -52,8 +52,31 @@ class Game {
         this.createScene();
         this.currentScene = this.scenes[0];
         this.backgroundColor = "white";
+        this.inputRecievers = [];
+
+        this.keyListener = this.canvas.parentElement.addEventListener("keydown",(e)=>{
+            if(e.key=="w"||e.key=="s"){
+                this.inputRecievers.forEach((methodArr)=>{
+                    if(methodArr[0]=="vertical")
+                        methodArr[1](e.key=="w"?1:-1);
+                });
+            }
+            if(e.key=="a"||e.key=="d"){
+                this.inputRecievers.forEach((methodArr)=>{
+                    if(methodArr[0]=="horizontal")
+                        methodArr[1](e.key=="d"?1:-1)
+                });
+            }
+        });
         
         return new Proxy(this, contactProxyHandlers);
+    }
+
+
+    addInputReciever(inputType, methodToCall){
+        if(!(inputType.toLowerCase()=="horizontal"||inputType.toLowerCase()=="vertical"))
+            console.error(`inputType is not valid, use Horizontal, Vertical, or All... ${inputType}`);
+        this.inputRecievers.push([inputType.toLowerCase(),methodToCall]);
     }
 
     // if canvas not specified, then create one
@@ -137,6 +160,30 @@ class Game {
         let ctx = canvas.getContext("2d");
         this.spritesPrivateLater.forEach((sprite) => {
             sprite.drawSprite(ctx);
+        })
+    }
+}
+/** Properties
+ * this.canvas = canvas != null ? canvas : this.createCanvas();
+        this.left = 0;
+        this.top = 0;
+        this.right = this.canvas.getBoundingClientRect().width;
+        this.bottom = this.canvas.getBoundingClientRect().height;
+        this.scenes = [];
+        this.createScene();
+        this.currentScene = this.scenes[0];
+        this.backgroundColor = "white";
+ */
+class OmnidirectionalGame extends Game{
+    constructor(canvas = null){
+        super(canvas);
+        this.player = Scene.createCircle(300,300,25);
+        this.backgroundColor = "#36393F";
+        this.addInputReciever("vertical", (input)=>{
+            console.log("V" + input)
+        })
+        this.addInputReciever("horizontal", (input)=>{
+            console.log("H" + input)
         })
     }
 }
@@ -225,12 +272,22 @@ class Scene {
         this.spritesPrivateLater.push(temp);
         return temp;
     }
+    static createPolygon(pointsList, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!pointsList) { throw new Error("addPolygon requires (pointsList) arguments") }
+        let temp = new Polygon(pointsList, fillColor, isFilled, strokeColor);
+        return temp;
+    }
     
     // Add a circle to the sprites.
     addCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
         if (!x || !y || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
         let temp = new Circle(x, y, radius, fillColor, isFilled, strokeColor);
         this.spritesPrivateLater.push(temp);
+        return temp;
+    }
+    static createCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!x || !y || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
+        let temp = new Circle(x, y, radius, fillColor, isFilled, strokeColor);
         return temp;
     }
     
@@ -241,12 +298,22 @@ class Scene {
         this.spritesPrivateLater.push(temp);
         return temp;
     }
+    static createRegularPolygon(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!x || !y || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
+        let temp = new RegularPolygon(x, y, radius, sides, fillColor, isFilled, strokeColor);
+        return temp;
+    }
 
     // lets you add a rectangle
     addRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
         if (!x || !y || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
         let temp = new Rectangle(x, y, width, height, color, isFilled, strokeColor);
         this.spritesPrivateLater.push(temp);
+        return temp;
+    }
+    static createRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
+        if (!x || !y || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
+        let temp = new Rectangle(x, y, width, height, color, isFilled, strokeColor);
         return temp;
     }
     
@@ -257,6 +324,11 @@ class Scene {
         this.spritesPrivateLater.push(temp);
         return temp;
     }
+    static createImage(image, x, y, width = 0, height = 0){
+        if (!image || !x || !y) { throw new Error("addImage requires (image, x, y) arguments") }
+        let temp = new ImageSprite(image, x, y, width, height);
+        return temp;
+    }
 
     // Adds a label to the sprites.
     addLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
@@ -265,14 +337,19 @@ class Scene {
         this.spritesPrivateLater.push(temp);
         return temp;
     }
+    static createLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
+        if (!textValue || x==undefined || y==undefined) { throw new Error(`addLabel requires (textValue, x, y) arguments... ${textValue}, ${x}, ${y}`) }
+        let temp = new Label(textValue, x, y, fillColor, isFilled, strokeColor);
+        return temp;
+    }
 
     setGravity(gravityVal=0.3, sceneSpeed = 0, floorLevel = -1){
         this.gravityVal = gravityVal;
         this.sceneSpeed = sceneSpeed;
-        this.floorLevel = this.createFloor();
+        this.floorLevel = this.addFloor();
     }
 
-    createFloor(){
+    addFloor(){
         return 0;
     }
     

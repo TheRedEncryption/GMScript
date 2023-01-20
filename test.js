@@ -43,6 +43,8 @@ scene.addSprite(image2);
 let regPoly = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineWidth(25).setLineRounding("round");
 scene.addSprite(regPoly)
 
+let regPoly2 = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineWidth(25).setLineRounding("round");
+scene.addSprite(regPoly2)
 //scene.setGravity() // create floor for this later
 
 game.renderScene();
@@ -50,6 +52,8 @@ game.renderScene();
 scene.addSprite(new Circle(regPoly.points[0][0], regPoly.points[0][1], 7, "gold", true, "black")); // regPoly "focus" point
 
 let theREMOVALRECT = scene.addRectangle(100,100,300,300,"orange").setLineWidth(20).setLineRounding("round")
+
+let omniGame = new OmnidirectionalGame();
 
 let direction = 1;
 let directiony = 1;
@@ -80,10 +84,10 @@ game.onStep(()=>{
     
     //polyGroup.x-=5;
     regPoly2.y+=5;
-    game2.renderScene();
+    game.renderScene();
 
-    if(regPoly2.top>game2.bottom){
-        regPoly2.setBottom(game2.top)
+    if(regPoly2.top>game.bottom){
+        regPoly2.setBottom(game.top)
     }
     if(polyGroup.right<game.left){
         polyGroup.setLeft(game.right)
