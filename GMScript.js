@@ -552,7 +552,7 @@ class Group {
 class Sprite {
 
     // list of acceptable types, can be expanded later
-    #acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon"];
+    #acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon", "line"];
 
     // constructor for such
     constructor(type, x, y, color) {
@@ -633,6 +633,32 @@ class Sprite {
     setBottom(pixels) {
         this.bottom = pixels;
         this.y = this.bottom - this.height;
+    }
+}
+
+class Line extends Sprite{
+    constructor(x1, y1, x2, y2, fillColor){
+        super("line", x1, y1, fillColor)
+        this.x2 = x2;
+        this.y2 = y2;
+    }
+
+    updateShape(){
+        this.left = this.x<this.x2?this.x:this.x2
+        this.top = this.y<this.y2?this.y:this.y2
+        this.right = this.x>this.x2?this.x:this.x2
+        this.bottom = this.y>this.y2?this.y:this.y2
+        this.height= Math.abs(this.y-this.y2);
+        this.width= Math.abs(this.x-this.x2);
+    }
+
+    drawSprite(ctx){
+        this.updateShape();
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x2, this.y2);
+        ctx.stroke();
+        ctx.closePath();
     }
 }
 
