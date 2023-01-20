@@ -156,12 +156,12 @@ class Game {
     }
     
     // render function that draws all the sprites inside of each scene
-    render(canvas) {
-        let ctx = canvas.getContext("2d");
-        this.spritesPrivateLater.forEach((sprite) => {
-            sprite.drawSprite(ctx);
-        })
-    }
+    // render(canvas) {
+    //     let ctx = canvas.getContext("2d");
+    //     this.spritesPrivateLater.forEach((sprite) => {
+    //         sprite.drawSprite(ctx);
+    //     })
+    // }
 }
 /** Properties
  * this.canvas = canvas != null ? canvas : this.createCanvas();
@@ -474,17 +474,23 @@ class Sprite {
 
     // constructor for such
     constructor(type, x, y, color) {
+        
         if (!this.#acceptableTypes.includes(type)) { throw new Error(`${type} is not a valid type, use one of the following: ${this.#acceptableTypes.join(", ")}`) }
         if (typeof x != "number" || typeof y != "number") { throw new Error(`x or y is not a number: x: ${x}, y: ${y}`) }
+        
         this.type = type;
         this.x = x;
         this.y = y;
-        this.fillColor = color;
+
         this.rotation = 0;
         this.scale = 1.0;
+        
+        this.fillColor = color;
+        
         this.lineWidth = 1.0;
-        this.floorLevel = false;
         this.lineRounding = "miter";
+        
+        this.floorLevel = false;
     }
 
     // converts degree input to radian (unless second parameter is false)
@@ -495,6 +501,11 @@ class Sprite {
         else {
             this.rotation = rotation;
         }
+    }
+
+    setScale(scale){
+        this.scale = scale;
+        return this;
     }
 
     drawSprite(ctx) {
@@ -693,8 +704,8 @@ class Rectangle extends Sprite {
     updateShape() {
         this.left = this.x;
         this.top = this.y;
-        this.right = this.x + this.width;
-        this.bottom = this.y + this.height;
+        this.right = this.x + this.width * this.scale;
+        this.bottom = this.y + this.height * this.scale;
     }
 
     // the Rectangle's drawSprite() function
@@ -712,7 +723,7 @@ class Rectangle extends Sprite {
         ctx.lineWidth = this.lineWidth;
 
         // creates the rectangle, fills it, and then creates the stroke
-        ctx.rect(this.x, this.y, this.width, this.height);
+        ctx.rect(this.x, this.y, this.width * this.scale, this.height * this.scale);
         ctx.fill();
         ctx.stroke();
 
@@ -755,8 +766,8 @@ class ImageSprite extends Rectangle {
         }
 
         this.currentCostume = this.costumes[this.costumeNumber]
-        this.width = this.currentCostume.width;
-        this.height = this.currentCostume.height;
+        this.width = this.currentCostume.width * this.scale;
+        this.height = this.currentCostume.height * this.scale;
     }
 
     // Draw a sprite.
@@ -776,8 +787,8 @@ class ImageSprite extends Rectangle {
             this.costumeNumber = this.costumes.length - 1;
         }
         this.currentCostume = this.costumes[this.costumeNumber]
-        this.width = this.currentCostume.width;
-        this.height = this.currentCostume.height;
+        this.width = this.currentCostume.width * this.scale;
+        this.height = this.currentCostume.height * this.scale;
     }
 
     // saves the canvas, translates, rotates, draws, and then restores
@@ -863,6 +874,7 @@ class Label extends Rectangle {
         ctx.lineWidth = this.lineWidth;
         ctx.textAlign = this.hAlign;
         
+        
         ctx.fillText(this.textValue, this.x, this.y+this.height);
         ctx.strokeText(this.textValue, this.x, this.y+this.height);
         ctx.closePath();
@@ -873,6 +885,11 @@ class Label extends Rectangle {
     }
 
     italicize(){
+        return this;
+    }
+
+    setText(value){
+        this.textValue = value;
         return this;
     }
 }
