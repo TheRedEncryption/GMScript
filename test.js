@@ -54,7 +54,6 @@ game.renderScene();
 
 scene.addSprite(new Circle(regPoly.points[0][0], regPoly.points[0][1], 7, "gold", true, "black")); // regPoly "focus" point
 
-
 let omniGame = new OmnidirectionalGame();
 
 let direction = 1;

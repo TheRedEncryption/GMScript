@@ -52,30 +52,106 @@ class Game {
         this.createScene();
         this.currentScene = this.scenes[0];
         this.backgroundColor = "white";
+        this.verticalPressed = false;
+        this.horizontalPressed = false;
         this.inputRecievers = [];
-
-        this.keyListener = this.canvas.parentElement.addEventListener("keydown",(e)=>{
-            if(e.key=="w"||e.key=="s"){
-                this.inputRecievers.forEach((methodArr)=>{
-                    if(methodArr[0]=="vertical")
-                        methodArr[1](e.key=="w"?1:-1);
-                });
+                            //    W S A D   Used in the inputs
+        this.controlsIntervals = [0,0,0,0]
+        this.keydownStepsPerSecond = 60;
+        this.keyDownListener = this.canvas.parentElement.addEventListener("keydown",(e)=>{
+            if(e.key==="w"||e.key==="s"){this.verticalPressed=true}
+            if(e.key==="a"||e.key==="d"){this.horizontalPressed=true}
+            if(e.key=="w"){
+                if(this.controlsIntervals[0]==0){
+                    this.controlsIntervals[0] = setInterval(()=>{
+                        this.inputRecievers.forEach((methodArr)=>{
+                            if(methodArr[0]=="wsad"){
+                                methodArr[1]("w")
+                            }
+                        })
+                    }, 1000/this.keydownStepsPerSecond);
+                }
             }
-            if(e.key=="a"||e.key=="d"){
-                this.inputRecievers.forEach((methodArr)=>{
-                    if(methodArr[0]=="horizontal")
-                        methodArr[1](e.key=="d"?1:-1)
-                });
+            if (e.key == "s") {
+                if(this.controlsIntervals[1]==0){
+                    this.controlsIntervals[1] = setInterval(() => {
+                        this.inputRecievers.forEach((methodArr) => {
+                            if(methodArr[0]=="wsad"){
+                                methodArr[1]("s")
+                            }
+                        })
+                    }, 1000/this.keydownStepsPerSecond);
+                }
+            }
+            if (e.key == "a") {
+                if(this.controlsIntervals[2]==0){
+                    this.controlsIntervals[2] = setInterval(() => {
+                        this.inputRecievers.forEach((methodArr) => {
+                            if(methodArr[0]=="wsad"){
+                                methodArr[1]("a")
+                            }
+                        })
+                    }, 1000/this.keydownStepsPerSecond);
+                }
+            }
+            if (e.key == "d") {
+                if(this.controlsIntervals[3]==0){
+                    this.controlsIntervals[3] = setInterval(() => {
+                        this.inputRecievers.forEach((methodArr) => {
+                            if(methodArr[0]=="wsad"){
+                                methodArr[1]("d")
+                            }
+                        })
+                    }, 1000/this.keydownStepsPerSecond);
+                }
             }
         });
+        this.canvas.parentElement.addEventListener("keyup",(e)=>{
+            if(e.key==="w"||e.key==="s"){this.verticalPressed=false}
+            if(e.key==="a"||e.key==="d"){this.horizontalPressed=false}
+            if(e.key=="w"){
+                if(this.controlsIntervals[0]!=0){
+                    clearInterval(this.controlsIntervals[0]);
+                    this.controlsIntervals[0] = 0;
+                }
+            }
+            if (e.key == "s") {
+                if (this.controlsIntervals[1] != 0) {
+                    clearInterval(this.controlsIntervals[1]);
+                    this.controlsIntervals[1] = 0;
+                }
+            }
+            if (e.key == "a") {
+                if (this.controlsIntervals[2] != 0) {
+                    clearInterval(this.controlsIntervals[2]);
+                    this.controlsIntervals[2] = 0;
+                }
+            }
+            if (e.key == "d") {
+                if (this.controlsIntervals[3] != 0) {
+                    clearInterval(this.controlsIntervals[3]);
+                    this.controlsIntervals[3] = 0;
+                }
+            }
+        })
+        document.onmousemove = (mouse)=>{
+            this.inputRecievers.forEach((methodArr)=>{
+                if(methodArr[0]=="mouse"){
+                    var rect = mouse.target.getBoundingClientRect();
+                    var relativeX = mouse.clientX - rect.left;
+                    var relativeY = mouse.clientY - rect.top;
+                    methodArr[1](mouse.x, mouse.y, relativeX, relativeY);
+                }
+            })
+        }
         
         return new Proxy(this, contactProxyHandlers);
     }
 
 
     addInputReciever(inputType, methodToCall){
-        if(!(inputType.toLowerCase()=="horizontal"||inputType.toLowerCase()=="vertical"))
-            console.error(`inputType is not valid, use Horizontal, Vertical, or All... ${inputType}`);
+        if(!(inputType.toLowerCase()=="wsad"||inputType.toLowerCase()=="mouse"))
+            console.error(`inputType is not valid, use wsad... ${inputType}`);
         this.inputRecievers.push([inputType.toLowerCase(),methodToCall]);
     }
 
@@ -163,27 +239,33 @@ class Game {
     //     })
     // }
 }
-/** Properties
- * this.canvas = canvas != null ? canvas : this.createCanvas();
-        this.left = 0;
-        this.top = 0;
-        this.right = this.canvas.getBoundingClientRect().width;
-        this.bottom = this.canvas.getBoundingClientRect().height;
-        this.scenes = [];
-        this.createScene();
-        this.currentScene = this.scenes[0];
-        this.backgroundColor = "white";
- */
 class OmnidirectionalGame extends Game{
     constructor(canvas = null){
         super(canvas);
-        this.player = Scene.createCircle(300,300,25);
+        this.player = new Circle(300,300,20)
+        this.scenes[0].addSprite(this.player);
         this.backgroundColor = "#36393F";
-        this.addInputReciever("vertical", (input)=>{
-            console.log("V" + input)
+        this.speed = 1
+        this.keydownStepsPerSecond = 5000
+        this.addInputReciever("wsad", (input)=>{
+            let speed;
+            // if(input==="w"&&input==="a"){speed = -this.speed/2}
+            if(input==="w"){speed = -this.speed}
+            if(input==="s"){speed = this.speed}
+            if(input==="d"){speed = this.speed}
+            if(input==="a"){speed = -this.speed}
+            if(input=="w"||input=="s"){
+                this.player.y+= this.horizontalPressed?speed/Math.sqrt(2):speed
+            }
+            if(input=="a"||input=="d"){
+                this.player.x+=this.verticalPressed?speed/Math.sqrt(2):speed
+            }
         })
-        this.addInputReciever("horizontal", (input)=>{
-            console.log("H" + input)
+        this.addInputReciever("mouse", (globalX, globalY, relativeX, relativeY)=>{
+            //console.log(globalX, globalY, relativeX, relativeY)
+        });
+        this.onStep(()=>{
+            this.renderScene();
         })
     }
 }
