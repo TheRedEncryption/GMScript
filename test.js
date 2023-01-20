@@ -15,6 +15,7 @@ scene.addSprite(polygon2);
 let polyGroup = new Group(new Rectangle(275,500,100,100,"rgb(137,50,255)"), new Rectangle(250,400,100,100,"rgb(100,137,255)"), new Rectangle(225,300,100,100,"rgb(150,150,255)"))
 scene.addGroup(polyGroup);
 
+game.addLine(0,600,600,0,"orange").setLineWidth(1)
 scene.addLabel("testing the scene things",300,300,"orange",true,"rgb(117,85,0)").setFont("Noto Serif Toto", 50).setAlignment("center","center").setLineWidth(2)
 scene.addLabel("right aligned",game.right,500,"black",true,"white").setFont("Noto Serif Toto", 50).setAlignment("right","center").setLineWidth(1)
 
@@ -49,6 +50,7 @@ scene.addSprite(regPoly)
 let regPoly2 = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineWidth(25).setLineRounding("round");
 scene.addSprite(regPoly2)
 //scene.setGravity() // create floor for this later
+
 
 game.renderScene();
 

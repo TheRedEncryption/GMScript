@@ -231,6 +231,12 @@ class Game {
         return this.currentScene.addLabel(textValue, x, y, fillColor, isFilled, strokeColor);
     }
     
+    // Adds a label to the sprites.
+    addLine(x1, y1, x2, y2, fillColor="black"){
+        if (x1==undefined || y1==undefined || x2==undefined || y2==undefined) { throw new Error("addLabel requires (textValue, x, y) arguments") }
+        return this.currentScene.addLine(x1, y1, x2, y2, fillColor);
+    }
+
     // render function that draws all the sprites inside of each scene
     // render(canvas) {
     //     let ctx = canvas.getContext("2d");
@@ -422,6 +428,18 @@ class Scene {
     static createLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
         if (!textValue || x==undefined || y==undefined) { throw new Error(`addLabel requires (textValue, x, y) arguments... ${textValue}, ${x}, ${y}`) }
         let temp = new Label(textValue, x, y, fillColor, isFilled, strokeColor);
+        return temp;
+    }
+
+    addLine(x1, y1, x2, y2, fillColor="black"){
+        if (x1==undefined || y1==undefined || x2==undefined || y2==undefined) { throw new Error("addLabel requires (textValue, x, y) arguments") }
+        let temp = new Line(x1, y1, x2, y2, fillColor);
+        this.spritesPrivateLater.push(temp);
+        return temp;
+    }
+    static addLine(x1, y1, x2, y2, fillColor="black"){
+        if (x1==undefined || y1==undefined || x2==undefined || y2==undefined) { throw new Error("addLabel requires (textValue, x, y) arguments") }
+        let temp = new Line(x1, y1, x2, y2, fillColor);
         return temp;
     }
 
@@ -637,7 +655,7 @@ class Sprite {
 }
 
 class Line extends Sprite{
-    constructor(x1, y1, x2, y2, fillColor){
+    constructor(x1, y1, x2, y2, fillColor="black"){
         super("line", x1, y1, fillColor)
         this.x2 = x2;
         this.y2 = y2;
@@ -655,6 +673,8 @@ class Line extends Sprite{
     drawSprite(ctx){
         this.updateShape();
         ctx.beginPath();
+        ctx.strokeStyle = this.fillColor != null ? this.fillColor : "rgba(0,0,0,0)";
+        ctx.lineWidth = this.lineWidth;
         ctx.moveTo(this.x, this.y);
         ctx.lineTo(this.x2, this.y2);
         ctx.stroke();
