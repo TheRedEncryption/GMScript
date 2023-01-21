@@ -58,6 +58,29 @@ scene.addSprite(new Circle(regPoly.points[0][0], regPoly.points[0][1], 7, "gold"
 
 let omniGame = new OmnidirectionalGame();
 
+
+omniGame.sword = new Line(omniGame.player.x+omniGame.player.radius+10, omniGame.player.y,omniGame.player.x+omniGame.player.radius+50, omniGame.player.y).setLineWidth(4);
+omniGame.scenes[0].addSprite(omniGame.sword);
+function updateSword(){
+    let angle = Math.round(omniGame.getAngleBetweenPoints(omniGame.player.x, omniGame.player.y, omniGame.lastMousePos[0], omniGame.lastMousePos[1]))
+    let point1 = omniGame.getPointInDirection(omniGame.player.x, omniGame.player.y, angle, 30);
+    omniGame.sword.x = point1[0];
+    omniGame.sword.y = point1[1];
+    let point2 = omniGame.getPointInDirection(omniGame.player.x, omniGame.player.y, angle, 70);
+    omniGame.sword.x2 = point2[0];
+    omniGame.sword.y2 = point2[1];
+}
+
+omniGame.addInputReciever("mouse", ()=>{
+    if(omniGame.isMouseHover==true){
+        updateSword()
+    }
+})
+
+omniGame.addInputReciever("wsad", ()=>{
+    updateSword()
+})
+
 let direction = 1;
 let directiony = 1;
 var speed = 3;

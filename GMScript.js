@@ -52,10 +52,11 @@ class Game {
         this.createScene();
         this.currentScene = this.scenes[0];
         this.backgroundColor = "white";
+        this.isMouseHover = false;
         this.verticalPressed = false;
         this.horizontalPressed = false;
         this.inputRecievers = [];
-                            //    W S A D   Used in the inputs
+        //    W S A D   Used in the inputs
         this.controlsIntervals = [0,0,0,0]
         this.keydownStepsPerSecond = 60;
         this.keyDownListener = this.canvas.parentElement.addEventListener("keydown",(e)=>{
@@ -144,11 +145,40 @@ class Game {
                 }
             })
         }
+        var self = this;
+        this.canvas.addEventListener("mouseleave", function (event) {
+            self.isMouseHover = false
+        }, false);
+        this.canvas.addEventListener("mouseover", function (event) {
+            self.isMouseHover = true
+        }, false);
         
         return new Proxy(this, contactProxyHandlers);
     }
+    
+    getAngleBetweenPoints(x1,y1,x2,y2){
+        if(x1 == x2 && y1 == y2) {throw new Error(`These are the same point fool... (${x1},${y1}) and (${x2},${y2})`)}
+        let theta = Math.atan2(x2-x1,y2-y1);
+        if (theta < 0.0){
+            theta += Math.PI*2;
+        }
+        let thetaDeg = theta * (180/Math.PI);
+        thetaDeg = -thetaDeg+180;
+        if(thetaDeg< 0){
+            thetaDeg += 360;
+        }
+        return (thetaDeg);
+    }
 
-
+    getPointInDirection(x,y,angle,distance, isDegrees = true){
+        if(isDegrees){
+            angle = angle * (Math.PI/180)
+        }
+        let finalX = x + Math.sin(angle) * distance
+        let finalY = y - Math.cos(angle) * distance
+        return [finalX, finalY]
+    }
+    
     addInputReciever(inputType, methodToCall){
         if(!(inputType.toLowerCase()=="wsad"||inputType.toLowerCase()=="mouse"))
             console.error(`inputType is not valid, use wsad... ${inputType}`);
@@ -249,6 +279,7 @@ class OmnidirectionalGame extends Game{
     constructor(canvas = null){
         super(canvas);
         this.player = new Circle(300,300,20)
+        this.lastMousePos = [0,0]
         this.scenes[0].addSprite(this.player);
         this.backgroundColor = "#36393F";
         this.speed = 1
@@ -268,7 +299,10 @@ class OmnidirectionalGame extends Game{
             }
         })
         this.addInputReciever("mouse", (globalX, globalY, relativeX, relativeY)=>{
-            //console.log(globalX, globalY, relativeX, relativeY)
+            //console.log(globalX, globalY, relativeX, relativeY,this.isMouseHover)
+            if(omniGame.isMouseHover==true){
+                this.lastMousePos = [relativeX, relativeY]
+            }
         });
         this.onStep(()=>{
             this.renderScene();
