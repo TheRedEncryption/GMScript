@@ -1,7 +1,35 @@
-originalConsole = window.console;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: GMScript.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: GMScript.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>originalConsole = window.console;
 window.console.font = function(url){
     split = url.split("/")
-    text = "<style>\n\t@import url('https://fonts.googleapis.com/css2?family=" + split[split.length-1] + "&display=swap');\n</style>"
+    text = "&lt;style>\n\t@import url('https://fonts.googleapis.com/css2?family=" + split[split.length-1] + "&amp;display=swap');\n&lt;/style>"
     originalConsole.log(text)
 }
 /** 
@@ -21,12 +49,12 @@ const rexAllNegativeDigits = /-\d+/;
 const contactProxyHandlers = {
     /**
      * 
-     * @param {Array.<Scene>} target 
+     * @param {Array.&lt;Scene>} target 
      * @param {number} key 
      * @returns {Scene}
      */
     get(target, key) {
-        if (rexAllNegativeDigits.test(key) && Math.abs(key) <= target.scenes.length) {
+        if (rexAllNegativeDigits.test(key) &amp;&amp; Math.abs(key) &lt;= target.scenes.length) {
             return target.scenes[target.scenes.length + parseInt(key)];
         }
         if (rexAllDigits.test(key)) {
@@ -35,7 +63,7 @@ const contactProxyHandlers = {
         return target[key];
     },
     set(target, key, value) {
-        if (rexAllNegativeDigits.test(key) && Math.abs(key) <= target.scenes.length) {
+        if (rexAllNegativeDigits.test(key) &amp;&amp; Math.abs(key) &lt;= target.scenes.length) {
             return Reflect.set(target.scenes, target.scenes.length + parseInt(key), value);
         }
         if (rexAllDigits.test(key)) {
@@ -60,7 +88,7 @@ class Game {
     /**
     * Creates an instance of Game.
     * @param {HTMLCanvasElement} canvas - The canvas element for the game. If none is provided, a canvas will be created.
-    * @param {Array.<Scene>} scenes - The scenes for the game. If none are provided, a default scene will be created.
+    * @param {Array.&lt;Scene>} scenes - The scenes for the game. If none are provided, a default scene will be created.
     */
     constructor(canvas = null, scenes = null) {
         this.canvas = canvas != null ? canvas : this.createCanvas();
@@ -69,7 +97,7 @@ class Game {
         this.right = this.canvas.getBoundingClientRect().width;
         this.bottom = this.canvas.getBoundingClientRect().height;
         /**
-         * @type {Array.<Scene>}
+         * @type {Array.&lt;Scene>}
          */
         this.scenes = [];
         this.createScene();
@@ -191,14 +219,14 @@ class Game {
      * @returns {number} Angle between the points, with 0 being up and 90 being right
      */
     getAngleBetweenPoints(x1,y1,x2,y2){
-        if(x1 == x2 && y1 == y2) {console.warn(`These are the same point fool... (${x1},${y1}) and (${x2},${y2})`)}
+        if(x1 == x2 &amp;&amp; y1 == y2) {console.warn(`These are the same point fool... (${x1},${y1}) and (${x2},${y2})`)}
         let theta = Math.atan2(x2-x1,y2-y1);
-        if (theta < 0.0){
+        if (theta &lt; 0.0){
             theta += Math.PI*2;
         }
         let thetaDeg = theta * (180/Math.PI);
         thetaDeg = -thetaDeg+180;
-        if(thetaDeg< 0){
+        if(thetaDeg&lt; 0){
             thetaDeg += 360;
         }
         return (thetaDeg);
@@ -211,7 +239,7 @@ class Game {
      * @param {number} angle, direction to find point in
      * @param {number} distance, how far to go at that angle
      * @param {boolean} isDegrees, if the provided angle is in degrees
-     * @returns {Array.<number>} The point found in the direction and distance provided
+     * @returns {Array.&lt;number>} The point found in the direction and distance provided
      */
     getPointInDirection(x,y,angle,distance, isDegrees = true){
         if(isDegrees){
@@ -307,7 +335,7 @@ class Game {
 
     /**
      * Adds a new polygon to the sprites.
-     * @param {Array.<Array.<number>>} pointsList 2D array of points for the polygon
+     * @param {Array.&lt;Array.&lt;number>>} pointsList 2D array of points for the polygon
      * @example
      * game.addPolygon([[0,0],[500,500],[0,500]])
      * @param {string|null} fillColor Color of the shape
@@ -433,17 +461,17 @@ class TopDownGame extends Game{
         this.isCenteredCamera = false;
         this.wasdReciever = this.addInputReciever("wasd", (input)=>{
             let speed;
-            // if(input==="w"&&input==="a"){speed = -this.speed/2}
+            // if(input==="w"&amp;&amp;input==="a"){speed = -this.speed/2}
             if(input==="w"){speed = -this.speed}
             if(input==="s"){speed = this.speed}
             if(input==="d"){speed = this.speed}
             if(input==="a"){speed = -this.speed}
             verticalCheck: if(input=="w"||input=="s"){
                 if(!this.isOpenBorders){
-                    if(this.player.y-this.verticalWallBufferDist<this.top&&input=="w"){
+                    if(this.player.y-this.verticalWallBufferDist&lt;this.top&amp;&amp;input=="w"){
                         break verticalCheck
                     }
-                    else if(this.player.y+this.verticalWallBufferDist>this.bottom&&input=="s"){
+                    else if(this.player.y+this.verticalWallBufferDist>this.bottom&amp;&amp;input=="s"){
                         break verticalCheck
                     }
                 }
@@ -463,10 +491,10 @@ class TopDownGame extends Game{
             }
             horizontalCheck: if(input=="a"||input=="d"){
                 if(!this.isOpenBorders){
-                    if(this.player.x-this.horizontalWallBufferDist<this.left&&input=="a"){
+                    if(this.player.x-this.horizontalWallBufferDist&lt;this.left&amp;&amp;input=="a"){
                         break horizontalCheck
                     }
-                    else if(this.player.x+this.horizontalWallBufferDist>this.right&&input=="d"){
+                    else if(this.player.x+this.horizontalWallBufferDist>this.right&amp;&amp;input=="d"){
                         break horizontalCheck
                     }
                 }
@@ -500,7 +528,7 @@ class Scene {
     // Realistically a Scene has no default sprites
     spritesArray;
     constructor(sprites) {
-        if (!Array.isArray(sprites) && sprites != undefined) { throw Error(`${sprites} is not an Array`) }
+        if (!Array.isArray(sprites) &amp;&amp; sprites != undefined) { throw Error(`${sprites} is not an Array`) }
         this.spritesArray = Array.isArray(sprites) ? sprites : [];
         this.gravityVal = 0;
         this.sceneSpeed = 0;
@@ -539,7 +567,7 @@ class Scene {
     // Checks if a list contains an object.
     #containsObject(obj, list) {
         var i;
-        for (i = 0; i < list.length; i++) {
+        for (i = 0; i &lt; list.length; i++) {
             if (list[i] === obj) {
                 return true;
             }
@@ -601,7 +629,7 @@ class Scene {
             return sprite
         }
         else if (typeof layer == "number"){
-            if(!(layer<0||false)){
+            if(!(layer&lt;0||false)){
                 return console.error(`setSpriteLayer requires either a number (greater than 0) or a string (top, bottom, or middle)... ${layer}`)
             }
             if(!isFinite(layer)||layer>this.spritesArray.length){
@@ -615,7 +643,7 @@ class Scene {
 
     /**
      * Adds a new polygon to the sprites.
-     * @param {Array.<Array.<number>>} pointsList 2D array of points for the polygon
+     * @param {Array.&lt;Array.&lt;number>>} pointsList 2D array of points for the polygon
      * @example
      * game.addPolygon([[0,0],[500,500],[0,500]])
      * @param {string|null} fillColor Color of the shape
@@ -808,11 +836,11 @@ class Group {
             }
             if(minX==undefined){minX=arg.x}
             if(maxX==undefined){maxX=arg.x+arg.width}
-            if(arg.x<minX){minX=arg.x}            
+            if(arg.x&lt;minX){minX=arg.x}            
             if(arg.x+arg.width>maxX){maxX=arg.x+arg.width}            
             if(minY==undefined){minY=arg.y}
             if(maxY==undefined){maxY=arg.y+arg.height}
-            if(arg.y<minY){minY=arg.y}            
+            if(arg.y&lt;minY){minY=arg.y}            
             if(arg.y+arg.height>maxY){maxY=arg.y+arg.height}           
         })
         this.x = minX;
@@ -835,11 +863,11 @@ class Group {
             }
             if(minX==undefined){minX=arg.x}
             if(maxX==undefined){maxX=arg.x+arg.width}
-            if(arg.x<minX){minX=arg.x}            
+            if(arg.x&lt;minX){minX=arg.x}            
             if(arg.x+arg.width>maxX){maxX=arg.x+arg.width}            
             if(minY==undefined){minY=arg.y}
             if(maxY==undefined){maxY=arg.y+arg.height}
-            if(arg.y<minY){minY=arg.y}            
+            if(arg.y&lt;minY){minY=arg.y}            
             if(arg.y+arg.height>maxY){maxY=arg.y+arg.height}           
         })
         this.x = minX;
@@ -911,10 +939,10 @@ class BoxCollider extends Collider{
     hits(boxCollider){
         //console.warn(this, boxCollider)
         //console.log(this.right>=boxCollider.left)
-        //console.log(this.left<=boxCollider.right)
+        //console.log(this.left&lt;=boxCollider.right)
         //console.log(this.bottom>=boxCollider.top)
-        //console.log(this.top<=boxCollider.bottom)
-        if(this.right>=boxCollider.left && this.left<=boxCollider.right && this.bottom>=boxCollider.top && this.top<=boxCollider.bottom){
+        //console.log(this.top&lt;=boxCollider.bottom)
+        if(this.right>=boxCollider.left &amp;&amp; this.left&lt;=boxCollider.right &amp;&amp; this.bottom>=boxCollider.top &amp;&amp; this.top&lt;=boxCollider.bottom){
             return true
         }
     }
@@ -1017,8 +1045,8 @@ class Line extends Sprite{
     }
 
     updateShape(){
-        this.left = this.x<this.x2?this.x:this.x2
-        this.top = this.y<this.y2?this.y:this.y2
+        this.left = this.x&lt;this.x2?this.x:this.x2
+        this.top = this.y&lt;this.y2?this.y:this.y2
         this.right = this.x>this.x2?this.x:this.x2
         this.bottom = this.y>this.y2?this.y:this.y2
         this.height= Math.abs(this.y-this.y2);
@@ -1061,9 +1089,9 @@ class Polygon extends Sprite{
             if(maxX==undefined){maxX=arg[0]}
             if(minY==undefined){minY=arg[1]}
             if(maxY==undefined){maxY=arg[1]}
-            if(arg[0]<minX){minX=arg[0]}            
+            if(arg[0]&lt;minX){minX=arg[0]}            
             if(arg[0]>maxX){maxX=arg[0]}            
-            if(arg[1]<minY){minY=arg[1]}            
+            if(arg[1]&lt;minY){minY=arg[1]}            
             if(arg[1]>maxY){maxY=arg[1]}            
         })
         //this.x = minX;
@@ -1085,7 +1113,7 @@ class Polygon extends Sprite{
             ctx.beginPath();
             ctx.moveTo(this.points[0][0], this.points[0][1]+this.y);          
 
-            for (var i = 1; i < this.points.length; i++) {
+            for (var i = 1; i &lt; this.points.length; i++) {
                 ctx.lineTo(this.points[i][0], this.points[i][1]+this.y);
             }
             ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
@@ -1102,7 +1130,7 @@ class Polygon extends Sprite{
 class Circle extends Sprite {
     /* Circle(centerX, centerY, radius, fill='black', border=None,
        borderWidth=2, opacity=100, rotateAngle=0, dashes=False,
-       align='center', visible=True) <----- CMU CS Academy
+       align='center', visible=True) &lt;----- CMU CS Academy
     */
     constructor(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null) {
         super("circle", x, y, fillColor);
@@ -1149,7 +1177,7 @@ class RegularPolygon extends Circle{
         temp.push([this.x +  this.radius * Math.cos(0+this.polyRotation), this.y +  this.radius *  Math.sin(0+this.polyRotation)]);
         temp.push(temp[0]);
         temp.push(temp[1]);
-        for (var i = 1; i <= this.sides;i += 1) {
+        for (var i = 1; i &lt;= this.sides;i += 1) {
             
             let tempX = this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides+this.polyRotation);
             let tempY = this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides+this.polyRotation);
@@ -1251,7 +1279,7 @@ class ImageSprite extends Rectangle {
             tempImages = image;
         }
 
-        for(let i = 0; i < tempImages.length; i++){
+        for(let i = 0; i &lt; tempImages.length; i++){
 
             // Constructs a new Image instance.
             if(typeof tempImages[i] == "string"){
@@ -1289,7 +1317,7 @@ class ImageSprite extends Rectangle {
         if(this.costumeNumber > this.costumes.length - 1){
             this.costumeNumber = 0;
         }
-        else if(this.costumeNumber < 0){
+        else if(this.costumeNumber &lt; 0){
             this.costumeNumber = this.costumes.length - 1;
         }
         this.currentCostume = this.costumes[this.costumeNumber]
@@ -1401,4 +1429,26 @@ class Label extends Rectangle {
         this.textValue = value;
         return this;
     }
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><a href="../index.html">Examples</a><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.0</a> on Sat Jan 21 2023 19:55:23 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
