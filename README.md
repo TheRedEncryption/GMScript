@@ -4,6 +4,9 @@
 - Can be integrated **seamlessly** into whatever Canvas/JS project it is required in
 - Great for **game development** and **data visualization**!
 
+### Demo View
+[GMScript Demo](https://theredencryption.github.io/GMScript/)
+
 ### Script tag
 **Copy and paste** this tag inside the `<head>` of the HTML document to begin using GMScript!
 ```html
