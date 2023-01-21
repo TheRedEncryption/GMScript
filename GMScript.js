@@ -282,7 +282,7 @@ class Game {
     //     })
     // }
 }
-class OmnidirectionalGame extends Game{
+class TopDownGame extends Game{
     constructor(isOpenBorders = false, canvas = null){
         super(canvas);
         this.player = new Circle(300,300,20)
