@@ -1,4 +1,4 @@
-let exampleGame = new OmnidirectionalGame(isOpenBorders=true);
+let exampleGame = new TopDownGame(isOpenBorders=true);
 exampleGame.name="EXAMPLE GAME"
 exampleGame.addRectangle(0,0,600,600,null, false, "black").setLineWidth(100)
 exampleGame.addImage("info.png", 450,150)

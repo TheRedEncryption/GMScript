@@ -56,7 +56,7 @@ game.renderScene();
 
 scene.addSprite(new Circle(regPoly.points[0][0], regPoly.points[0][1], 7, "gold", true, "black")); // regPoly "focus" point
 
-let omniGame = new OmnidirectionalGame();
+let omniGame = new TopDownGame();
 
 
 omniGame.sword = new Line(omniGame.player.x+omniGame.player.radius+10, omniGame.player.y,omniGame.player.x+omniGame.player.radius+50, omniGame.player.y).setLineWidth(4);
