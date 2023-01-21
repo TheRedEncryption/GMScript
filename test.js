@@ -77,8 +77,14 @@ omniGame.addInputReciever("mouse", ()=>{
     }
 })
 
-omniGame.addInputReciever("wsad", ()=>{
+omniGame.addInputReciever("wasd", ()=>{
     updateSword()
+})
+
+let showcaseReciever = omniGame.addInputReciever("wasd", ()=>{
+    console.log("showcaseReciever and removal")
+    console.log("if this wasn't removed it would keep printing this statement while wasd was held")
+    omniGame.removeInputReciever(showcaseReciever);
 })
 
 let direction = 1;

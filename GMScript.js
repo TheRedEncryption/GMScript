@@ -66,7 +66,7 @@ class Game {
                 if(this.controlsIntervals[0]==0){
                     this.controlsIntervals[0] = setInterval(()=>{
                         this.inputRecievers.forEach((methodArr)=>{
-                            if(methodArr[0]=="wsad"){
+                            if(methodArr[0]=="wasd"){
                                 methodArr[1]("w")
                             }
                         })
@@ -77,7 +77,7 @@ class Game {
                 if(this.controlsIntervals[1]==0){
                     this.controlsIntervals[1] = setInterval(() => {
                         this.inputRecievers.forEach((methodArr) => {
-                            if(methodArr[0]=="wsad"){
+                            if(methodArr[0]=="wasd"){
                                 methodArr[1]("s")
                             }
                         })
@@ -88,7 +88,7 @@ class Game {
                 if(this.controlsIntervals[2]==0){
                     this.controlsIntervals[2] = setInterval(() => {
                         this.inputRecievers.forEach((methodArr) => {
-                            if(methodArr[0]=="wsad"){
+                            if(methodArr[0]=="wasd"){
                                 methodArr[1]("a")
                             }
                         })
@@ -99,7 +99,7 @@ class Game {
                 if(this.controlsIntervals[3]==0){
                     this.controlsIntervals[3] = setInterval(() => {
                         this.inputRecievers.forEach((methodArr) => {
-                            if(methodArr[0]=="wsad"){
+                            if(methodArr[0]=="wasd"){
                                 methodArr[1]("d")
                             }
                         })
@@ -157,7 +157,7 @@ class Game {
     }
     
     getAngleBetweenPoints(x1,y1,x2,y2){
-        if(x1 == x2 && y1 == y2) {throw new Error(`These are the same point fool... (${x1},${y1}) and (${x2},${y2})`)}
+        if(x1 == x2 && y1 == y2) {console.warn(`These are the same point fool... (${x1},${y1}) and (${x2},${y2})`)}
         let theta = Math.atan2(x2-x1,y2-y1);
         if (theta < 0.0){
             theta += Math.PI*2;
@@ -180,9 +180,16 @@ class Game {
     }
     
     addInputReciever(inputType, methodToCall){
-        if(!(inputType.toLowerCase()=="wsad"||inputType.toLowerCase()=="mouse"))
-            console.error(`inputType is not valid, use wsad... ${inputType}`);
-        this.inputRecievers.push([inputType.toLowerCase(),methodToCall]);
+        if(!(inputType.toLowerCase()=="wasd"||inputType.toLowerCase()=="mouse"))
+            console.error(`inputType is not valid, use wasd... ${inputType}`);
+        let theArray = [inputType.toLowerCase(),methodToCall]
+        this.inputRecievers.push(theArray);
+        return theArray;
+    }
+
+    removeInputReciever(inputRecieverArray){
+        let index = this.inputRecievers.indexOf(inputRecieverArray)
+        this.inputRecievers.splice(index, 1)
     }
 
     // if canvas not specified, then create one
@@ -284,17 +291,31 @@ class OmnidirectionalGame extends Game{
         this.backgroundColor = "#36393F";
         this.speed = 1
         this.keydownStepsPerSecond = 5000
-        this.addInputReciever("wsad", (input)=>{
+        this.verticalWallBufferDist = this.player.radius;
+        this.horizontalWallBufferDist = this.player.radius;
+        this.wasdReciever = this.addInputReciever("wasd", (input)=>{
             let speed;
             // if(input==="w"&&input==="a"){speed = -this.speed/2}
             if(input==="w"){speed = -this.speed}
             if(input==="s"){speed = this.speed}
             if(input==="d"){speed = this.speed}
             if(input==="a"){speed = -this.speed}
-            if(input=="w"||input=="s"){
+            verticalCheck: if(input=="w"||input=="s"){
+                if(this.player.y-this.verticalWallBufferDist<this.top&&input=="w"){
+                    break verticalCheck
+                }
+                else if(this.player.y+this.verticalWallBufferDist>this.bottom&&input=="s"){
+                    break verticalCheck
+                }
                 this.player.y+= this.horizontalPressed?speed/Math.sqrt(2):speed
             }
-            if(input=="a"||input=="d"){
+            horizontalCheck: if(input=="a"||input=="d"){
+                if(this.player.x-this.horizontalWallBufferDist<this.left&&input=="a"){
+                    break horizontalCheck
+                }
+                else if(this.player.x+this.horizontalWallBufferDist>this.right&&input=="d"){
+                    break horizontalCheck
+                }
                 this.player.x+=this.verticalPressed?speed/Math.sqrt(2):speed
             }
         })
