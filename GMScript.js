@@ -277,7 +277,7 @@ class Game {
     // render function that draws all the sprites inside of each scene
     // render(canvas) {
     //     let ctx = canvas.getContext("2d");
-    //     this.spritesPrivateLater.forEach((sprite) => {
+    //     this.spritesArray.forEach((sprite) => {
     //         sprite.drawSprite(ctx);
     //     })
     // }
@@ -316,7 +316,7 @@ class TopDownGame extends Game{
                     this.player.y+= moveAmount
                 }
                 else{
-                    this.currentScene.spritesPrivateLater.forEach((sprite)=>{
+                    this.currentScene.spritesArray.forEach((sprite)=>{
                         if(this.player===sprite){
                             return
                         }
@@ -339,7 +339,7 @@ class TopDownGame extends Game{
                     this.player.x+= moveAmount
                 }
                 else{
-                    this.currentScene.spritesPrivateLater.forEach((sprite)=>{
+                    this.currentScene.spritesArray.forEach((sprite)=>{
                         if(this.player===sprite){
                             return
                         }
@@ -362,10 +362,10 @@ class TopDownGame extends Game{
 
 class Scene {
     // Realistically a Scene has no default sprites
-    spritesPrivateLater;
+    spritesArray;
     constructor(sprites) {
         if (!Array.isArray(sprites) && sprites != undefined) { throw Error(`${sprites} is not an Array`) }
-        this.spritesPrivateLater = Array.isArray(sprites) ? sprites : [];
+        this.spritesArray = Array.isArray(sprites) ? sprites : [];
         this.gravityVal = 0;
         this.sceneSpeed = 0;
         this.floorLevel = -1;
@@ -373,8 +373,8 @@ class Scene {
 
     // Add a sprite to the sprites collection.
     addSprite() {
-        console.log(this.spritesPrivateLater)
-        let self = this.spritesPrivateLater;
+        console.log(this.spritesArray)
+        let self = this.spritesArray;
 
         // lets the user define the Sprite object to be added
         let addSpriteInit = function (type, x, y, color = "black") {
@@ -412,10 +412,10 @@ class Scene {
     }
     
     remove(sprite){
-        if((this.#containsObject(sprite, this.spritesPrivateLater))){
-            let index = this.spritesPrivateLater.indexOf(sprite);
+        if((this.#containsObject(sprite, this.spritesArray))){
+            let index = this.spritesArray.indexOf(sprite);
             if (index > -1) { // only splice array when item is found
-                this.spritesPrivateLater.splice(index, 1); // 2nd parameter means remove one item only
+                this.spritesArray.splice(index, 1); // 2nd parameter means remove one item only
             }
             else{
                 return console.warn("Sprite was not found in the sprites array for this scene... " + sprite)
@@ -427,14 +427,14 @@ class Scene {
     addGroup(group){
         if(!(group instanceof Group)){return console.error(`addGroup takes a Group object as input... ${group}`)}
         group.sprites.forEach((sprite)=>{
-            if((this.#containsObject(sprite, this.spritesPrivateLater))){
-                let index = this.spritesPrivateLater.indexOf(sprite);
+            if((this.#containsObject(sprite, this.spritesArray))){
+                let index = this.spritesArray.indexOf(sprite);
                 if (index > -1) { // only splice array when item is found
-                    this.spritesPrivateLater.splice(index, 1); // 2nd parameter means remove one item only
+                    this.spritesArray.splice(index, 1); // 2nd parameter means remove one item only
                 }
             }
         })
-        this.spritesPrivateLater.push(group)
+        this.spritesArray.push(group)
     }
 
     #array_move(arr, old_index, new_index) {
@@ -452,15 +452,15 @@ class Scene {
             if(!(layer=="top"||layer=="bottom"||layer=="middle")){
                 return console.error(`setSpriteLayer requires either a number (greater than 0) or a string (top, bottom, or middle)... ${layer}`)
             }
-            let tempInd = this.spritesPrivateLater.indexOf(sprite);
+            let tempInd = this.spritesArray.indexOf(sprite);
             if(layer==="bottom"){
-                this.#array_move(this.spritesPrivateLater,tempInd,0)
+                this.#array_move(this.spritesArray,tempInd,0)
             }
             if(layer==="top"){
-                this.#array_move(this.spritesPrivateLater,tempInd,this.spritesPrivateLater.length-1);
+                this.#array_move(this.spritesArray,tempInd,this.spritesArray.length-1);
             }
             if(layer==="middle"){
-                this.#array_move(this.spritesPrivateLater,tempInd,Math.floor((this.spritesPrivateLater.length-1)/2));
+                this.#array_move(this.spritesArray,tempInd,Math.floor((this.spritesArray.length-1)/2));
             }
             return sprite
         }
@@ -468,10 +468,10 @@ class Scene {
             if(!(layer<0||false)){
                 return console.error(`setSpriteLayer requires either a number (greater than 0) or a string (top, bottom, or middle)... ${layer}`)
             }
-            if(!isFinite(layer)||layer>this.spritesPrivateLater.length){
-                layer = this.spritesPrivateLater.length-1
+            if(!isFinite(layer)||layer>this.spritesArray.length){
+                layer = this.spritesArray.length-1
             }
-            this.#array_move(this.spritesPrivateLater,tempInd,layer)
+            this.#array_move(this.spritesArray,tempInd,layer)
             return sprite
         }
         return console.error("setSpriteLayer accepts strings or numbers")
@@ -481,7 +481,7 @@ class Scene {
     addPolygon(pointsList, fillColor = "black", isFilled = true, strokeColor = null){
         if (!pointsList) { throw new Error("addPolygon requires (pointsList) arguments") }
         let temp = new Polygon(pointsList, fillColor, isFilled, strokeColor);
-        this.spritesPrivateLater.push(temp);
+        this.spritesArray.push(temp);
         return temp;
     }
     static createPolygon(pointsList, fillColor = "black", isFilled = true, strokeColor = null){
@@ -494,7 +494,7 @@ class Scene {
     addCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
         if (x==undefined || y==undefined || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
         let temp = new Circle(x, y, radius, fillColor, isFilled, strokeColor);
-        this.spritesPrivateLater.push(temp);
+        this.spritesArray.push(temp);
         return temp;
     }
     static createCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
@@ -507,7 +507,7 @@ class Scene {
     addRegularPolygon(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
         if (x==undefined || y==undefined || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
         let temp = new RegularPolygon(x, y, radius, sides, fillColor, isFilled, strokeColor);
-        this.spritesPrivateLater.push(temp);
+        this.spritesArray.push(temp);
         return temp;
     }
     static createRegularPolygon(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
@@ -520,7 +520,7 @@ class Scene {
     addRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
         if (x==undefined || y==undefined || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
         let temp = new Rectangle(x, y, width, height, color, isFilled, strokeColor);
-        this.spritesPrivateLater.push(temp);
+        this.spritesArray.push(temp);
         return temp;
     }
     static createRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
@@ -533,7 +533,7 @@ class Scene {
     addImage(image, x, y, width = 0, height = 0){
         if (!image || x==undefined || y==undefined) { throw new Error("addImage requires (image, x, y) arguments") }
         let temp = new ImageSprite(image, x, y, width, height);
-        this.spritesPrivateLater.push(temp);
+        this.spritesArray.push(temp);
         return temp;
     }
     static createImage(image, x, y, width = 0, height = 0){
@@ -546,7 +546,7 @@ class Scene {
     addLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
         if (!textValue || x==undefined || y==undefined) { throw new Error(`addLabel requires (textValue, x, y) arguments... ${textValue}, ${x}, ${y}`) }
         let temp = new Label(textValue, x, y, fillColor, isFilled, strokeColor);
-        this.spritesPrivateLater.push(temp);
+        this.spritesArray.push(temp);
         return temp;
     }
     static createLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
@@ -558,7 +558,7 @@ class Scene {
     addLine(x1, y1, x2, y2, fillColor="black"){
         if (x1==undefined || y1==undefined || x2==undefined || y2==undefined) { throw new Error("addLabel requires (textValue, x, y) arguments") }
         let temp = new Line(x1, y1, x2, y2, fillColor);
-        this.spritesPrivateLater.push(temp);
+        this.spritesArray.push(temp);
         return temp;
     }
     static addLine(x1, y1, x2, y2, fillColor="black"){
@@ -581,7 +581,7 @@ class Scene {
     render(canvas) {
         let ctx = canvas.getContext("2d");
         this.sceneSpeed += this.gravityVal;
-        this.spritesPrivateLater.forEach((sprite) => {
+        this.spritesArray.forEach((sprite) => {
             sprite.y+=this.sceneSpeed;
             sprite.floorLevel = this.floorLevel;
             sprite.drawSprite(ctx);
@@ -690,6 +690,34 @@ class Group {
     }
 }
 
+class Collider {
+    constructor(){
+
+    }
+}
+
+class BoxCollider extends Collider{
+    constructor(left, top, right, bottom){
+        super();
+        //console.warn("bx", left, top, right-left, bottom-top, right, bottom)
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
+    }
+
+    hits(boxCollider){
+        //console.warn(this, boxCollider)
+        //console.log(this.right>=boxCollider.left)
+        //console.log(this.left<=boxCollider.right)
+        //console.log(this.bottom>=boxCollider.top)
+        //console.log(this.top<=boxCollider.bottom)
+        if(this.right>=boxCollider.left && this.left<=boxCollider.right && this.bottom>=boxCollider.top && this.top<=boxCollider.bottom){
+            return true
+        }
+    }
+}
+
 // declaration for the Sprite object (only serves as a superclass and does not work as a sprite of its own)
 class Sprite {
 
@@ -729,6 +757,7 @@ class Sprite {
 
     setScale(scale){
         this.scale = scale;
+        this.updateShape();
         return this;
     }
 
@@ -950,6 +979,21 @@ class Rectangle extends Sprite {
         this.top = this.y;
         this.right = this.x + this.width;
         this.bottom = this.y + this.height;
+        this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
+    }
+
+    hits(hitsArray){
+        if(!Array.isArray(hitsArray)){return console.error(`.hits(Array) needs an array... ${hitsArray}`)}
+        hitsArray.forEach((element)=>{
+            if(!(element instanceof Sprite||element instanceof Group)){return console.error(`.hits(Array) needs the array to contain only Sprites or Groups... ${element} in ${hitsArray}`)}
+        })
+        let successArray = []
+        hitsArray.forEach((element)=>{
+            if(element.boxCollider.hits(this.boxCollider)){
+                successArray.push(element);
+            }
+        })
+        return successArray;
     }
 
     // updates the left, top, right, and bottom values to be used
@@ -958,6 +1002,9 @@ class Rectangle extends Sprite {
         this.top = this.y;
         this.right = this.x + this.width * this.scale;
         this.bottom = this.y + this.height * this.scale;
+        this.width = this.right-this.left;
+        this.height = this.bottom-this.top;
+        this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
     // the Rectangle's drawSprite() function
@@ -1020,6 +1067,11 @@ class ImageSprite extends Rectangle {
         this.currentCostume = this.costumes[this.costumeNumber]
         this.width = this.currentCostume.width * this.scale;
         this.height = this.currentCostume.height * this.scale;
+        this.left = this.x;
+        this.top = this.y;
+        this.right = this.x + this.width * this.scale;
+        this.bottom = this.y + this.height * this.scale;
+        this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
     // Draw a sprite.
@@ -1068,6 +1120,7 @@ class Label extends Rectangle {
         this.textValue = textValue;
         this.hAlign = "left";
         this.vAlign = "top";
+        this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
     // Sets the alignment of the rectangle.
@@ -1090,6 +1143,8 @@ class Label extends Rectangle {
             let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
             this.width = metrics.width;
             this.height = actualHeight;
+            super.updateShape()
+            this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
         }
 
         /* NOT WORKING cause im cringe

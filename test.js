@@ -51,6 +51,18 @@ let regPoly2 = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)")
 scene.addSprite(regPoly2)
 //scene.setGravity() // create floor for this later
 
+let collisionImg1 = scene.addImage("direwarning.png", 500,0)
+let collisionImg2 = scene.addImage("tre.png", 450,25).setScale(0.20)
+console.error(collisionImg2.left,collisionImg2.top,collisionImg2.right,collisionImg2.bottom,collisionImg2.width,collisionImg2.height)
+let collisionLabel1 = scene.addLabel("A", 500,0,null, false, "teal").setFont("Noto Serif Toto", 50)
+let collisionLabel2 = scene.addLabel("check console", 260,25,null, false, "teal").setFont("Noto Serif Toto", 50)
+let collisionRect1 = scene.addRectangle(500,0,collisionImg1.width, collisionImg1.height,null, false, "teal")
+let collisionRect2 = scene.addRectangle(260,25,collisionImg2.width, collisionImg2.height,null, false, "teal")
+let collisionRect3 = scene.addRectangle(500,125,50,50,"rgba(137,40,137,0.5)", true, "teal").setScale(0.995)
+// Read comment on line below
+console.warn(`collisionImg1 hits `, collisionImg1.hits([collisionImg2]), `and the boolean value: `, collisionImg1.hits([collisionImg2]).length!=0?"TRUE":"FALSE") // Sometimes this doesn't hit anything and sometimes it hits the other image, it seems based on the load time of the image. Recreate by hitting ctrl + f5 instead of f5
+console.warn(`collisionRect1 hits `, collisionRect1.hits([collisionRect2]), `and the boolean value: `, collisionRect1.hits([collisionRect2]).length!=0?"TRUE":"FALSE")
+console.warn(`collisionLabel1 hits `, collisionLabel1.hits([collisionLabel2]), `and the boolean value: `, collisionLabel1.hits([collisionLabel2]).length!=0?"TRUE":"FALSE")
 
 game.renderScene();
 
