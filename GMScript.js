@@ -52,7 +52,7 @@ class Game {
         this.createScene();
         this.currentScene = this.scenes[0];
         this.backgroundColor = "white";
-        this.isMouseHover = false;
+        this.mouseHovering = false;
         this.verticalPressed = false;
         this.horizontalPressed = false;
         this.inputRecievers = [];
@@ -135,7 +135,7 @@ class Game {
                 }
             }
         })
-        document.onmousemove = (mouse)=>{
+        window.addEventListener("mousemove",(mouse)=>{
             this.inputRecievers.forEach((methodArr)=>{
                 if(methodArr[0]=="mouse"){
                     var rect = mouse.target.getBoundingClientRect();
@@ -144,13 +144,13 @@ class Game {
                     methodArr[1](mouse.x, mouse.y, relativeX, relativeY);
                 }
             })
-        }
+        })
         var self = this;
         this.canvas.addEventListener("mouseleave", function (event) {
-            self.isMouseHover = false
+            self.mouseHovering = false
         }, false);
         this.canvas.addEventListener("mouseover", function (event) {
-            self.isMouseHover = true
+            self.mouseHovering = true
         }, false);
         
         return new Proxy(this, contactProxyHandlers);
@@ -240,31 +240,31 @@ class Game {
     
     // Add a circle to the sprites.
     addCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
-        if (!x || !y || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
+        if (x==undefined || y==undefined || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
         return this.currentScene.addCircle(x, y, radius, fillColor, isFilled, strokeColor);
     }
     
     // Adds a regular polygon to the sprites.
     addRegularPolygon(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
-        if (!x || !y || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
+        if (x==undefined || y==undefined || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
         return this.currentScene.addRegularPolygon(x, y, radius, sides, fillColor, isFilled, strokeColor);
     }
 
     // lets you add a rectangle
     addRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
-        if (!x || !y || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
+        if (x==undefined || y==undefined || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
         return this.currentScene.addRectangle(x, y, width, height, color, isFilled, strokeColor);
     }
     
     // Adds an image to the sprites.
     addImage(image, x, y, width = 0, height = 0){
-        if (!image || !x || !y) { throw new Error("addImage requires (image, x, y) arguments") }
+        if (!image || x==undefined || y==undefined) { throw new Error("addImage requires (image, x, y) arguments") }
         return this.currentScene.addImage(image, x, y, width, height);
     }
 
     // Adds a label to the sprites.
     addLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
-        if (!textValue || !x || !y) { throw new Error("addLabel requires (textValue, x, y) arguments") }
+        if (!textValue || x==undefined || y==undefined) { throw new Error("addLabel requires (textValue, x, y) arguments") }
         return this.currentScene.addLabel(textValue, x, y, fillColor, isFilled, strokeColor);
     }
     
@@ -283,7 +283,7 @@ class Game {
     // }
 }
 class OmnidirectionalGame extends Game{
-    constructor(canvas = null){
+    constructor(isOpenBorders = false, canvas = null){
         super(canvas);
         this.player = new Circle(300,300,20)
         this.lastMousePos = [0,0]
@@ -293,6 +293,8 @@ class OmnidirectionalGame extends Game{
         this.keydownStepsPerSecond = 5000
         this.verticalWallBufferDist = this.player.radius;
         this.horizontalWallBufferDist = this.player.radius;
+        this.isOpenBorders = isOpenBorders;
+        this.isCenteredCamera = false;
         this.wasdReciever = this.addInputReciever("wasd", (input)=>{
             let speed;
             // if(input==="w"&&input==="a"){speed = -this.speed/2}
@@ -301,27 +303,54 @@ class OmnidirectionalGame extends Game{
             if(input==="d"){speed = this.speed}
             if(input==="a"){speed = -this.speed}
             verticalCheck: if(input=="w"||input=="s"){
-                if(this.player.y-this.verticalWallBufferDist<this.top&&input=="w"){
-                    break verticalCheck
+                if(!this.isOpenBorders){
+                    if(this.player.y-this.verticalWallBufferDist<this.top&&input=="w"){
+                        break verticalCheck
+                    }
+                    else if(this.player.y+this.verticalWallBufferDist>this.bottom&&input=="s"){
+                        break verticalCheck
+                    }
                 }
-                else if(this.player.y+this.verticalWallBufferDist>this.bottom&&input=="s"){
-                    break verticalCheck
+                let moveAmount = this.horizontalPressed?speed/Math.sqrt(2):speed
+                if(!this.isCenteredCamera){
+                    this.player.y+= moveAmount
                 }
-                this.player.y+= this.horizontalPressed?speed/Math.sqrt(2):speed
+                else{
+                    this.currentScene.spritesPrivateLater.forEach((sprite)=>{
+                        if(this.player===sprite){
+                            return
+                        }
+                        sprite.y-= moveAmount;
+                        
+                    })
+                }
             }
             horizontalCheck: if(input=="a"||input=="d"){
-                if(this.player.x-this.horizontalWallBufferDist<this.left&&input=="a"){
-                    break horizontalCheck
+                if(!this.isOpenBorders){
+                    if(this.player.x-this.horizontalWallBufferDist<this.left&&input=="a"){
+                        break horizontalCheck
+                    }
+                    else if(this.player.x+this.horizontalWallBufferDist>this.right&&input=="d"){
+                        break horizontalCheck
+                    }
                 }
-                else if(this.player.x+this.horizontalWallBufferDist>this.right&&input=="d"){
-                    break horizontalCheck
+                let moveAmount = this.verticalPressed?speed/Math.sqrt(2):speed
+                if(!this.isCenteredCamera){
+                    this.player.x+= moveAmount
                 }
-                this.player.x+=this.verticalPressed?speed/Math.sqrt(2):speed
+                else{
+                    this.currentScene.spritesPrivateLater.forEach((sprite)=>{
+                        if(this.player===sprite){
+                            return
+                        }
+                        sprite.x-= moveAmount;
+                    })
+                }
             }
         })
         this.addInputReciever("mouse", (globalX, globalY, relativeX, relativeY)=>{
-            //console.log(globalX, globalY, relativeX, relativeY,this.isMouseHover)
-            if(omniGame.isMouseHover==true){
+            //console.log(globalX, globalY, relativeX, relativeY,this.mouseHovering)
+            if(this.mouseHovering==true){
                 this.lastMousePos = [relativeX, relativeY]
             }
         });
@@ -349,7 +378,7 @@ class Scene {
 
         // lets the user define the Sprite object to be added
         let addSpriteInit = function (type, x, y, color = "black") {
-            if (!type || !x || !y) { throw new Error("addSprite requires (type, x, y) arguments or (Sprite)") }
+            if (!type || x==undefined || y==undefined) { throw new Error("addSprite requires (type, x, y) arguments or (Sprite)") }
             self.push(new Sprite(type, x, y, color))
         }
 
@@ -407,6 +436,46 @@ class Scene {
         })
         this.spritesPrivateLater.push(group)
     }
+
+    #array_move(arr, old_index, new_index) {
+        if (new_index >= arr.length) {
+            var k = new_index - arr.length + 1;
+            while (k--) {
+                arr.push(undefined);
+            }
+        }
+        arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+    };
+
+    setSpriteLayer(sprite, layer){
+        if(typeof layer == "string"){
+            if(!(layer=="top"||layer=="bottom"||layer=="middle")){
+                return console.error(`setSpriteLayer requires either a number (greater than 0) or a string (top, bottom, or middle)... ${layer}`)
+            }
+            let tempInd = this.spritesPrivateLater.indexOf(sprite);
+            if(layer==="bottom"){
+                this.#array_move(this.spritesPrivateLater,tempInd,0)
+            }
+            if(layer==="top"){
+                this.#array_move(this.spritesPrivateLater,tempInd,this.spritesPrivateLater.length-1);
+            }
+            if(layer==="middle"){
+                this.#array_move(this.spritesPrivateLater,tempInd,Math.floor((this.spritesPrivateLater.length-1)/2));
+            }
+            return sprite
+        }
+        else if (typeof layer == "number"){
+            if(!(layer<0||false)){
+                return console.error(`setSpriteLayer requires either a number (greater than 0) or a string (top, bottom, or middle)... ${layer}`)
+            }
+            if(!isFinite(layer)||layer>this.spritesPrivateLater.length){
+                layer = this.spritesPrivateLater.length-1
+            }
+            this.#array_move(this.spritesPrivateLater,tempInd,layer)
+            return sprite
+        }
+        return console.error("setSpriteLayer accepts strings or numbers")
+    }
     
     // Adds a new polygon to the sprites.
     addPolygon(pointsList, fillColor = "black", isFilled = true, strokeColor = null){
@@ -423,52 +492,52 @@ class Scene {
     
     // Add a circle to the sprites.
     addCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
-        if (!x || !y || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
+        if (x==undefined || y==undefined || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
         let temp = new Circle(x, y, radius, fillColor, isFilled, strokeColor);
         this.spritesPrivateLater.push(temp);
         return temp;
     }
     static createCircle(x, y, radius, fillColor = "black", isFilled = true, strokeColor = null){
-        if (!x || !y || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
+        if (x==undefined || y==undefined || !radius) { throw new Error("addCircle requires (x, y, radius) arguments") }
         let temp = new Circle(x, y, radius, fillColor, isFilled, strokeColor);
         return temp;
     }
     
     // Adds a regular polygon to the sprites.
     addRegularPolygon(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
-        if (!x || !y || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
+        if (x==undefined || y==undefined || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
         let temp = new RegularPolygon(x, y, radius, sides, fillColor, isFilled, strokeColor);
         this.spritesPrivateLater.push(temp);
         return temp;
     }
     static createRegularPolygon(x, y, radius, sides, fillColor = "black", isFilled = true, strokeColor = null){
-        if (!x || !y || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
+        if (x==undefined || y==undefined || !radius || !sides) { throw new Error("addPolygon requires (x, y, radius, sides) arguments") }
         let temp = new RegularPolygon(x, y, radius, sides, fillColor, isFilled, strokeColor);
         return temp;
     }
 
     // lets you add a rectangle
     addRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
-        if (!x || !y || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
+        if (x==undefined || y==undefined || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
         let temp = new Rectangle(x, y, width, height, color, isFilled, strokeColor);
         this.spritesPrivateLater.push(temp);
         return temp;
     }
     static createRectangle(x = 250, y = 250, width = 100, height = 100, color = "black", isFilled = true, strokeColor = null) {
-        if (!x || !y || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
+        if (x==undefined || y==undefined || !width || !height) { throw new Error("addRectangle requires (x, y, width, height) arguments") }
         let temp = new Rectangle(x, y, width, height, color, isFilled, strokeColor);
         return temp;
     }
     
     // Adds an image to the sprites.
     addImage(image, x, y, width = 0, height = 0){
-        if (!image || !x || !y) { throw new Error("addImage requires (image, x, y) arguments") }
+        if (!image || x==undefined || y==undefined) { throw new Error("addImage requires (image, x, y) arguments") }
         let temp = new ImageSprite(image, x, y, width, height);
         this.spritesPrivateLater.push(temp);
         return temp;
     }
     static createImage(image, x, y, width = 0, height = 0){
-        if (!image || !x || !y) { throw new Error("addImage requires (image, x, y) arguments") }
+        if (!image || x==undefined || y==undefined) { throw new Error("addImage requires (image, x, y) arguments") }
         let temp = new ImageSprite(image, x, y, width, height);
         return temp;
     }

@@ -72,7 +72,7 @@ function updateSword(){
 }
 
 omniGame.addInputReciever("mouse", ()=>{
-    if(omniGame.isMouseHover==true){
+    if(omniGame.mouseHovering==true){
         updateSword()
     }
 })
