@@ -10,7 +10,7 @@
 ### Script tag
 **Copy and paste** this tag inside the `<head>` of the HTML document to begin using GMScript!
 ```html
-<script defer src="https://cdn.jsdelivr.net/gh/TheRedEncryption/GMScript@1.0.1-alpha/GMScript.js"> </script>
+<script defer src="https://cdn.jsdelivr.net/gh/TheRedEncryption/GMScript@1.0.2-alpha/GMScript.js"> </script>
 ```
 
 ### Documentation
