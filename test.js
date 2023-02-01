@@ -4,8 +4,6 @@ let game = new Game()
 console.log(game[0]);
 let scene = game.currentScene;
 
-game.addLine
-
 // Suprisingly the layer of each of them is based on the order they are rendered in even after clearing and drawing again
 // Probably because of the array of them but shush
 
@@ -100,6 +98,10 @@ let showcaseReciever = omniGame.addInputReciever("wasd", ()=>{
     console.log("if this wasn't removed it would keep printing this statement while wasd was held")
     omniGame.removeInputReciever(showcaseReciever);
 })
+
+let game3d = new Game3D();
+
+game3d.renderScene();
 
 game.setBackgroundColor("rgba(0,100,150,0.5)")
 
