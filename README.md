@@ -36,13 +36,18 @@ HTML File (index.html)
 ```
 JS File (main.js)
 ```js
-let game = new Game();
-let scene = game.currentScene;
-let rectangle = scene.addRectangle(100,100,300,300,"orange")
+// Game canvas is by default 600 by 600 pixels
+let game = new Game(); // Creates a game canvas
+let scene = game.currentScene; // Gets the default scene
+let rectangle = scene.addRectangle(0,100,300,300,"orange") // Creates a rectangle in the scene
+rectangle.setBottom(600); // Sets the bottom of the rectangle; works with Top, Right, and Left as well
+let circle = new Circle(50, 100, 50, fillColor = "teal", isFilled = true, strokeColor = "navy"); // Creates a circle
+scene.addSprite(circle); // Adds the circle to the scene
 
-let circle = new Circle(500, 100, 50, fillColor = "teal", isFilled = true, strokeColor = "navy");
-scene.addSprite(circle)
+game.renderScene(); // Renders the Scene; used here to load sprites when screen loads
+// The code inside onStep() is run 60 times per second by default
 game.onStep(()=>{
-  circle.x+=5;
+  circle.x+=5; // Moves the circle to the right
+  game.renderScene(); // Renders the Scene; used here to render every time there is an update to the scene
 });
 ```
