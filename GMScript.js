@@ -1546,7 +1546,9 @@ class Label extends Rectangle {
         this.y = y;
         this.fontSize = 12;
         this.font = "arial";
-        this.fontStyle = `12px "arial"`
+        this.fontBold = 'normal'
+        this.fontItalic = 'normal'
+        this.fontStyle = `normal normal 12px "arial"`
         this.textValue = textValue;
         this.hAlign = "left";
         this.vAlign = "top";
@@ -1565,10 +1567,10 @@ class Label extends Rectangle {
         if(typeof font == "string"){
             this.font = font;
             this.fontSize = fontSize;
-            this.fontStyle = `${fontSize}px "${this.font}"`
+            this.fontStyle = `${this.fontItalic} ${this.fontBold} ${fontSize}px "${this.font}"`
             let canvas = document.createElement("canvas");
             let ctx = canvas.getContext('2d');
-            ctx.font = `${fontSize}px "${this.font}"`;
+            ctx.font = `${this.fontItalic} ${this.fontBold} ${fontSize}px "${this.font}"`;
             let metrics = ctx.measureText(this.textValue);
             let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
             this.width = metrics.width;
@@ -1618,11 +1620,15 @@ class Label extends Rectangle {
         ctx.closePath();
     }
 
-    bolden(){
+    bolden(boldStyle = 'bold'){
+        this.fontBold = boldStyle
+        this.fontStyle = `${this.fontItalic} ${this.fontBold} ${this.fontSize}px "${this.font}"`
         return this;
     }
 
-    italicize(){
+    italicize(italicStyle = "italic"){
+        this.fontItalic = italicStyle;
+        this.fontStyle = `${this.fontItalic} ${this.fontBold} ${this.fontSize}px "${this.font}"`
         return this;
     }
 
@@ -1645,7 +1651,9 @@ class AdvancedLabel extends Rectangle {
         super(x,y,metrics.width,actualHeight, fillColor, isFilled, strokeColor);
         this.fontSize = 12;
         this.font = "arial";
-        this.fontStyle = `12px "arial"`
+        this.fontBold = 'normal'
+        this.fontItalic = 'normal'
+        this.fontStyle = `normal normal 12px "arial"`
         this.textValue = textValue;
         this.letters = [];
         let index = 0;
@@ -1661,7 +1669,7 @@ class AdvancedLabel extends Rectangle {
     setFont(font = null, fontSize = this.fontSize){
         this.font = font;
         this.fontSize = fontSize;
-        this.fontStyle = `${fontSize}px "${this.font}"`
+        this.fontStyle = `${this.fontItalic} ${this.fontBold} ${this.fontSize}px "${this.font}"`
         this.updatePlacement();
         return this;
     }
@@ -1669,7 +1677,7 @@ class AdvancedLabel extends Rectangle {
     updatePlacement(){
         let nextX;
         this.letters.forEach((letterLabel)=>{
-            let newLetter = letterLabel.setFont(this.font, this.fontSize);
+            let newLetter = letterLabel.setFont(this.font, this.fontSize).bolden(this.fontBold).italicize(this.fontItalic);
             if(nextX!=undefined){
                 newLetter.x = nextX;
             }
@@ -1684,16 +1692,20 @@ class AdvancedLabel extends Rectangle {
         })
     }
 
-    bolden(){
+    bolden(boldStyle = "bold"){
+        this.fontBold = boldStyle;
+        this.fontStyle = `${this.fontItalic} ${this.fontBold} ${this.fontSize}px "${this.font}"`
         this.letters.forEach((letterLabel)=>{
-            letterLabel.bolden();
+            letterLabel.bolden(boldStyle);
         });
         return this;
     }
 
-    italicize(){
+    italicize(italicStyle = "italic"){
+        this.fontItalic = italicStyle;
+        this.fontStyle = `${this.fontItalic} ${this.fontBold} ${this.fontSize}px "${this.font}"`
         this.letters.forEach((letterLabel)=>{
-            letterLabel.italicize();
+            letterLabel.italicize(italicStyle);
         });
         return this;
     }

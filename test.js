@@ -16,7 +16,7 @@ let polyGroup = new Group(new Rectangle(275,500,100,100,"rgb(137,50,255)"), new 
 scene.addGroup(polyGroup);
 
 game.addLine(0,600,600,0,"orange").setLineWidth(1)
-scene.addLabel("testing the scene things",300,300,"orange",true,"rgb(117,85,0)").setFont("Noto Serif Toto", 50).setAlignment("center","center").setLineWidth(2)
+scene.addLabel("testing the scene things",300,300,"orange",true,"rgba(117,85,0,.5)").setFont("Noto Serif Toto", 53).setAlignment("center","center").setLineWidth(2).bolden().italicize();
 scene.addLabel("right aligned",game.right,500,"black",true,"white").setFont("Noto Serif Toto", 50).setAlignment("right","center").setLineWidth(1)
 
 polyGroup.addSprite(new Rectangle(200,200,100,100,"cyan"))
@@ -29,7 +29,7 @@ let testingSussy = new Rectangle(150,50,50,50,"blue");
 scene.addSprite(testingSussy);
 
 
-let atext = new Label("Text", 0, 0, "cyan", true, "black").setFont("Noto Serif Toto", 50).setAlignment("left","top")
+let atext = new Label("Text", 0, 0, "cyan", true, "black").setFont("Noto Serif Toto", 50).setAlignment("left","top");
 console.error(atext.right)
 scene.addSprite(atext)
 console.font("https://fonts.google.com/noto/specimen/Noto+Serif+Toto")
@@ -65,7 +65,7 @@ console.warn(`collisionImg1 hits `, collisionImg1.hits([collisionImg2]), `and th
 console.warn(`collisionRect1 hits `, collisionRect1.hits([collisionRect2]), `and the boolean value: `, collisionRect1.hits([collisionRect2]).length!=0?"TRUE":"FALSE")
 console.warn(`collisionLabel1 hits `, collisionLabel1.hits([collisionLabel2]), `and the boolean value: `, collisionLabel1.hits([collisionLabel2]).length!=0?"TRUE":"FALSE")
 
-let advLbl = new AdvancedLabel("Baller", 300,300, "red").setFont("arial", 50).setText("More baller than before");
+let advLbl = new AdvancedLabel("Baller", 300,300, "red").setFont("arial", 50).setText("More baller than before").bolden().italicize();
 scene.addSprite(advLbl);
 
 //scene.setGravity(600)
