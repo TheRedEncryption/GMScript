@@ -123,7 +123,6 @@ let speed3 = 20;
 let gravity = 1.1;
 
 game.onStep(()=>{
-
     //regPoly2.sides = Math.round(speed);
     speed2+=gravity
     testingSussy.y+=speed2;
@@ -142,9 +141,20 @@ game.onStep(()=>{
         speed3*=-0.1;
     }
     // you can use atext.textValue to do the same
+    advLbl.x+=1;
     atext.setText(Math.round(testingBuddy.bottom));
     advLbl.setText(parseFloat(testingBuddy.fillColor.substr(4,6)).toString() + " " + Math.round(testingBuddy.y/testingBuddy.x))
 
+    letterIndex = 0;
+    advLbl.letters.forEach((letter)=>{
+        if(letterIndex==0 && letter.x>600){
+            advLbl.x = 0;
+        }
+        if(letter.x>600){
+            letter.x = letter.x-(600+letter.width);
+        }
+        letterIndex+=1;
+    })
     //polyGroup.x-=5;
     //regPoly2.y+=5;
     //game2.renderScene();
