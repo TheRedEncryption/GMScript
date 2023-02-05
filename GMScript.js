@@ -319,6 +319,30 @@ class Game {
     }
 
     /**
+     * Plays a note in the browser
+     * @param {number} frequency frequency of the note to be played
+     * @param {*} type Type of note... sine, sawtooth, square, triangle 
+     */
+    playNote(frequency, type) {
+        let availableTypes = ["sine", "square", "triangle", "sawtooth"]
+        if(!(availableTypes.includes(type.toLowerCase()))){
+            return console.error(`playNote type has to be sine, square, triangle, or sawtooth... ${type}`)
+        }
+        let context = new AudioContext();
+        let o = context.createOscillator();
+        let g = context.createGain();
+        o.type = type;
+        o.connect(g);
+        o.frequency.value = frequency;
+        g.connect(context.destination);
+        o.start(0);
+        g.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.2);
+        setTimeout(function () {
+            context.close()
+        }, 250)
+    }
+
+    /**
      * Adds a new polygon to the sprites.
      * @param {Array.<Array.<number>>} pointsList 2D array of points for the polygon
      * @example

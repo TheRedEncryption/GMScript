@@ -173,10 +173,12 @@ game.onStep(()=>{
     if(testingBuddy.right>game.right-direction*speed || testingBuddy.left<game.left-direction*speed){
        direction*=-1;
        testingBuddy.fillColor = `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+       game.playNote(testingBuddy.y,"sine");
     }
     if(testingBuddy.bottom>game.bottom-directiony*speed || testingBuddy.top<game.top-directiony*speed){
         directiony*=-1;
         testingBuddy.fillColor = `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+        game.playNote(testingBuddy.x,"sine");
     }
     
     image.y += 3;
