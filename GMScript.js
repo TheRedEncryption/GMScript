@@ -86,6 +86,8 @@ class Game {
         this.verticalPressed = false;
         this.horizontalPressed = false;
         this.inputRecievers = [];
+        // TODO: Add better support for all keys (remove the lag upon keypress)
+        this.controlsIntervalsAdvanced = [];
         //    W S A D   Used in the inputs
         this.controlsIntervals = [0,0,0,0]
         this.keydownStepsPerSecond = 60;
@@ -136,6 +138,13 @@ class Game {
                     }, 1000/this.keydownStepsPerSecond);
                 }
             }
+
+            this.inputRecievers.forEach((methodArr) => {
+                if(methodArr[0]==e.key){
+                    methodArr[1](e.key)
+                }
+            })
+
         });
         this.canvas.parentElement.addEventListener("keyup",(e)=>{
             if(e.key==="w"||e.key==="s"){this.verticalPressed=false}
@@ -233,7 +242,7 @@ class Game {
      */
     addInputReciever(inputType, methodToCall){
         if(!(inputType.toLowerCase()=="wasd"||inputType.toLowerCase()=="mouse"))
-            console.error(`inputType is not valid, use wasd... ${inputType}`);
+            console.warn(`inputType is not a default, ensure that the input is a key on the keyboard, or instead use "wasd" or "mouse" ... ${inputType}`);
         let theArray = [inputType.toLowerCase(),methodToCall]
         this.inputRecievers.push(theArray);
         return theArray;
@@ -676,7 +685,7 @@ class Scene {
         this.spritesArray = Array.isArray(sprites) ? sprites : [];
         this.gravityVal = 0;
         this.sceneSpeed = 0;
-        this.floorLevel = -1;
+        this.floorPosition = -1;
         this.parentGame = null;
     }
 
@@ -942,14 +951,17 @@ class Scene {
         return temp;
     }
 
-    setGravity(gravityVal=0.3, sceneSpeed = 0, floorLevel = -1){
+    setGravity(floorPosition = -1, gravityVal=0.3, sceneSpeed = 0){
         this.gravityVal = gravityVal;
         this.sceneSpeed = sceneSpeed;
-        this.floorLevel = this.addFloor();
+        this.floorPosition = this.addFloor(floorPosition);
     }
 
-    addFloor(){
-        return 0;
+    addFloor(floorPosition){
+        if(floorPosition==-1){
+            return null;
+        }
+        return floorPosition;
     }
     
     // render function that draws all the sprites inside of each scene
@@ -957,8 +969,8 @@ class Scene {
         let ctx = canvas.getContext(this.parentGame!=null?this.parentGame.contextType:"2d");
         this.sceneSpeed += this.gravityVal;
         this.spritesArray.forEach((sprite) => {
-            sprite.y+=this.sceneSpeed;
-            sprite.floorLevel = this.floorLevel;
+            sprite.sceneSpeed = this.sceneSpeed;
+            sprite.floorPosition = this.floorPosition;
             sprite.drawSprite(ctx);
         })
     }
@@ -1134,7 +1146,7 @@ class Sprite {
         this.lineWidth = 1.0;
         this.lineRounding = "miter";
         
-        this.floorLevel = false;
+        this.floorPosition = null;
     }
 
     // converts degree input to radian (unless second parameter is false)
@@ -1154,7 +1166,17 @@ class Sprite {
     }
 
     drawSprite(ctx) {
-        console.log("sprite")
+        console.log("Not a function yet");
+    }
+
+    checkFloor(){
+        if(this.floorPosition!=null && this.floorPosition<=this.bottom){
+            //this.setBottom(this.floorPosition)
+            this.sceneSpeed = 0;
+        }
+        else if (this.sceneSpeed!=null){
+            this.y+=this.sceneSpeed;
+        }
     }
 
     // moves the sprite in the number of pixels based on its current direction
@@ -1217,6 +1239,7 @@ class Line extends Sprite{
 
     drawSprite(ctx){
         this.updateShape();
+        this.checkFloor();
         ctx.beginPath();
         ctx.strokeStyle = this.fillColor != null ? this.fillColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
@@ -1271,6 +1294,7 @@ class Polygon extends Sprite{
     }
 
     drawSprite(ctx){
+        this.checkFloor();
         if(this.points.length>=1){
             ctx.beginPath();
             ctx.moveTo(this.points[0][0], this.points[0][1]+this.y);          
@@ -1312,6 +1336,7 @@ class Circle extends Sprite {
 
     drawSprite(ctx) {
         this.updateShape();
+        this.checkFloor();
         ctx.beginPath();
         ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
@@ -1333,6 +1358,7 @@ class RegularPolygon extends Circle{
     
     drawSprite(ctx){
         this.updateShape();
+        this.checkFloor();
         let temp = [];
         ctx.beginPath();
         ctx.moveTo (this.x +  this.radius * Math.cos(0+this.polyRotation), this.y +  this.radius *  Math.sin(0+this.polyRotation));          
@@ -1404,6 +1430,7 @@ class Rectangle extends Sprite {
 
         // updates the shape's properties
         this.updateShape();
+        this.checkFloor();
         ctx.beginPath();
         
         // if not filled, or has a stroke color, then use transparent
@@ -1475,6 +1502,7 @@ class ImageSprite extends Rectangle {
     // Updates the shape of the image.
     updateShape() {
         super.updateShape();
+        this.checkFloor();
         //console.log(this.costumeNumber);
         if(this.costumeNumber > this.costumes.length - 1){
             this.costumeNumber = 0;
@@ -1511,7 +1539,11 @@ class Label extends Rectangle {
         ctx.font = `12px "arial"`;
         let metrics = ctx.measureText(textValue);
         let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+        // SUPER CALL IS HERE
         super(x,y,metrics.width,actualHeight,fillColor,isFilled,strokeColor);
+        this.x = x;
+        this.y = y;
         this.fontSize = 12;
         this.font = "arial";
         this.fontStyle = `12px "arial"`
@@ -1570,6 +1602,7 @@ class Label extends Rectangle {
     drawSprite(ctx) {
         
         this.updateShape();
+        this.checkFloor();
         ctx.beginPath();
         
         ctx.font = this.fontStyle;
@@ -1595,6 +1628,94 @@ class Label extends Rectangle {
 
     setText(value){
         this.textValue = value;
+        return this;
+    }
+}
+
+class AdvancedLabel extends Rectangle {
+    //x, y, width, height, fillColor = "black", isFilled = true, strokeColor = null
+    constructor(textValue, x, y, fillColor = "black", isFilled = true, strokeColor = null) {
+        let canvas = document.createElement("canvas");
+        // Might need to make a 3D Label as a seperate class
+        let ctx = canvas.getContext('2d');
+        ctx.font = `12px "arial"`;
+        let metrics = ctx.measureText(textValue);
+        let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+        super(x,y,metrics.width,actualHeight, fillColor, isFilled, strokeColor);
+        this.fontSize = 12;
+        this.font = "arial";
+        this.fontStyle = `12px "arial"`
+        this.textValue = textValue;
+        this.letters = [];
+        let index = 0;
+        for(let i in textValue){
+            let newX = this.x + metrics.width/textValue.length * index
+            let tempLetter = new Label(textValue[i], newX, this.y, fillColor, isFilled, strokeColor);
+            tempLetter.setBottom(this.y);
+            this.letters.push(tempLetter);
+            index++;
+        }
+    }    
+    // setFont has to update the width and height and fontsize and fontstyle
+    setFont(font = null, fontSize = this.fontSize){
+        this.font = font;
+        this.fontSize = fontSize;
+        this.fontStyle = `${fontSize}px "${this.font}"`
+        this.updatePlacement();
+        return this;
+    }
+
+    updatePlacement(){
+        let nextX;
+        this.letters.forEach((letterLabel)=>{
+            let newLetter = letterLabel.setFont(this.font, this.fontSize);
+            if(nextX!=undefined){
+                newLetter.x = nextX;
+            }
+            nextX = newLetter.x + newLetter.width; 
+            newLetter.setBottom(this.y);
+        })
+    }
+
+    drawSprite(ctx) {
+        this.letters.forEach((letterLabel)=>{
+            letterLabel.drawSprite(ctx);
+        })
+    }
+
+    bolden(){
+        this.letters.forEach((letterLabel)=>{
+            letterLabel.bolden();
+        });
+        return this;
+    }
+
+    italicize(){
+        this.letters.forEach((letterLabel)=>{
+            letterLabel.italicize();
+        });
+        return this;
+    }
+
+    setText(textValue){
+        let canvas = document.createElement("canvas");
+        // Might need to make a 3D Label as a seperate class
+        let ctx = canvas.getContext('2d');
+        ctx.font = this.fontStyle;
+        let metrics = ctx.measureText(textValue);
+        let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        this.width = metrics.width;
+        this.height = actualHeight;
+        
+        this.letters = [];
+        for(let i in textValue){
+            let tempLetter = new Label(textValue[i], this.x, this.y, this.fillColor, this.isFilled, this.strokeColor);
+            tempLetter.setBottom(this.y);
+            tempLetter.setFont(this.fontStyle)
+            this.letters.push(tempLetter);
+        }
+        this.updatePlacement();
         return this;
     }
 }

@@ -30,6 +30,7 @@ scene.addSprite(testingSussy);
 
 
 let atext = new Label("Text", 0, 0, "cyan", true, "black").setFont("Noto Serif Toto", 50).setAlignment("left","top")
+console.error(atext.right)
 scene.addSprite(atext)
 console.font("https://fonts.google.com/noto/specimen/Noto+Serif+Toto")
 
@@ -63,6 +64,15 @@ let collisionRect3 = scene.addRectangle(500,125,50,50,"rgba(137,40,137,0.5)", tr
 console.warn(`collisionImg1 hits `, collisionImg1.hits([collisionImg2]), `and the boolean value: `, collisionImg1.hits([collisionImg2]).length!=0?"TRUE":"FALSE") // Sometimes this doesn't hit anything and sometimes it hits the other image, it seems based on the load time of the image. Recreate by hitting ctrl + f5 instead of f5
 console.warn(`collisionRect1 hits `, collisionRect1.hits([collisionRect2]), `and the boolean value: `, collisionRect1.hits([collisionRect2]).length!=0?"TRUE":"FALSE")
 console.warn(`collisionLabel1 hits `, collisionLabel1.hits([collisionLabel2]), `and the boolean value: `, collisionLabel1.hits([collisionLabel2]).length!=0?"TRUE":"FALSE")
+
+let advLbl = new AdvancedLabel("Baller", 300,300, "red").setFont("arial", 50).setText("More baller than before");
+scene.addSprite(advLbl);
+
+//scene.setGravity(600)
+
+game.addInputReciever("z", ()=>{
+    console.info("M" + Math.floor(Math.random()*10) + "o" + Math.floor(Math.random()*10) + "g" + Math.floor(Math.random()*10) + "u" + Math.floor(Math.random()*10) + "s" + Math.floor(Math.random()*10));
+})
 
 game.renderScene();
 
@@ -133,6 +143,7 @@ game.onStep(()=>{
     }
     // you can use atext.textValue to do the same
     atext.setText(Math.round(testingBuddy.bottom));
+    advLbl.setText(parseFloat(testingBuddy.fillColor.substr(4,6)).toString() + " " + Math.round(testingBuddy.y/testingBuddy.x))
 
     //polyGroup.x-=5;
     //regPoly2.y+=5;
