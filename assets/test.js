@@ -31,11 +31,11 @@ console.font("https://fonts.google.com/noto/specimen/Noto+Serif+Toto")
 
 
 let direWarning = new Image()
-direWarning.src = "/direwarning.png"
-let image = new ImageSprite([direWarning,"/info.png","/warning.png"], 100, 100);
+direWarning.src = "/assets/direwarning.png"
+let image = new ImageSprite([direWarning,"/assets/info.png","/assets/warning.png"], 100, 100);
 scene.addSprite(image);
 
-let image2 = new ImageSprite([direWarning,"/info.png","/warning.png"], 50, 100);
+let image2 = new ImageSprite([direWarning,"/assets/info.png","/assets/warning.png"], 50, 100);
 scene.addSprite(image2);
 image2.setScale(1.5);
 let theREMOVALRECT = scene.addRectangle(100,100,300,300,"orange").setLineWidth(20).setLineRounding("round")
@@ -47,8 +47,8 @@ let regPoly2 = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)")
 scene.addSprite(regPoly2)
 //scene.setGravity() // create floor for this later
 
-let collisionImg1 = scene.addImage("direwarning.png", 500,0)
-let collisionImg2 = scene.addImage("tre.png", 450,25).setScale(0.20)
+let collisionImg1 = scene.addImage("assets/direwarning.png", 500,0)
+let collisionImg2 = scene.addImage("assets/tre.png", 450,25).setScale(0.20)
 console.error(collisionImg2.left,collisionImg2.top,collisionImg2.right,collisionImg2.bottom,collisionImg2.width,collisionImg2.height)
 let collisionLabel1 = scene.addLabel("A", 500,0,null, false, "teal").setFont("Noto Serif Toto", 50)
 //let collisionLabel2 = scene.addLabel("check console", 260,25,null, false, "teal").setFont("Noto Serif Toto", 50)
