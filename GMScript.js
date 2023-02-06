@@ -1681,7 +1681,12 @@ class ImageSprite extends Rectangle {
         ctx.save();
         ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
         ctx.rotate(this.rotation);
-        ctx.drawImage(this.currentCostume, -this.width / 2, -this.height / 2, this.width, this.height);
+        try{
+            ctx.drawImage(this.currentCostume, -this.width / 2, -this.height / 2, this.width, this.height);
+        }
+        catch{
+            console.warn(":|");
+        }
         ctx.restore();
     }
 }
