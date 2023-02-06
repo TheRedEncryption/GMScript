@@ -31,11 +31,11 @@ console.font("https://fonts.google.com/noto/specimen/Noto+Serif+Toto")
 
 
 let direWarning = new Image()
-direWarning.src = "/assets/direwarning.png"
-let image = new ImageSprite([direWarning,"/assets/info.png","/assets/warning.png"], 100, 100);
+direWarning.src = "assets/direwarning.png"
+let image = new ImageSprite([direWarning,"assets/info.png","assets/warning.png"], 100, 100);
 scene.addSprite(image);
 
-let image2 = new ImageSprite([direWarning,"/assets/info.png","/assets/warning.png"], 50, 100);
+let image2 = new ImageSprite([direWarning,"assets/info.png","assets/warning.png"], 50, 100);
 scene.addSprite(image2);
 image2.setScale(1.5);
 let theREMOVALRECT = scene.addRectangle(100,100,300,300,"orange").setLineWidth(20).setLineRounding("round")
