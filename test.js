@@ -7,11 +7,6 @@ let scene = game.currentScene;
 // Suprisingly the layer of each of them is based on the order they are rendered in even after clearing and drawing again
 // Probably because of the array of them but shush
 
-let polygon = new Polygon([[0,0],[275,0],[225,250],[275,600],[0,600]]);
-let polygon2 = new Polygon([[600,0],[325,0],[375,250],[325,600],[600,600]]);
-scene.addSprite(polygon);
-scene.addSprite(polygon2);
-
 let polyGroup = new Group(new Rectangle(275,500,100,100,"rgb(137,50,255)"), new Rectangle(250,400,100,100,"rgb(100,137,255)"), new Rectangle(225,300,100,100,"rgb(150,150,255)"))
 scene.addGroup(polyGroup);
 
@@ -56,16 +51,22 @@ let collisionImg1 = scene.addImage("direwarning.png", 500,0)
 let collisionImg2 = scene.addImage("tre.png", 450,25).setScale(0.20)
 console.error(collisionImg2.left,collisionImg2.top,collisionImg2.right,collisionImg2.bottom,collisionImg2.width,collisionImg2.height)
 let collisionLabel1 = scene.addLabel("A", 500,0,null, false, "teal").setFont("Noto Serif Toto", 50)
-let collisionLabel2 = scene.addLabel("check console", 260,25,null, false, "teal").setFont("Noto Serif Toto", 50)
+//let collisionLabel2 = scene.addLabel("check console", 260,25,null, false, "teal").setFont("Noto Serif Toto", 50)
 let collisionRect1 = scene.addRectangle(500,0,collisionImg1.width, collisionImg1.height,null, false, "teal")
 let collisionRect2 = scene.addRectangle(260,25,collisionImg2.width, collisionImg2.height,null, false, "teal")
 let collisionRect3 = scene.addRectangle(500,125,50,50,"rgba(137,40,137,0.5)", true, "teal").setScale(0.995)
 // Read comment on line below
 console.warn(`collisionImg1 hits `, collisionImg1.hits([collisionImg2]), `and the boolean value: `, collisionImg1.hits([collisionImg2]).length!=0?"TRUE":"FALSE") // Sometimes this doesn't hit anything and sometimes it hits the other image, it seems based on the load time of the image. Recreate by hitting ctrl + f5 instead of f5
 console.warn(`collisionRect1 hits `, collisionRect1.hits([collisionRect2]), `and the boolean value: `, collisionRect1.hits([collisionRect2]).length!=0?"TRUE":"FALSE")
-console.warn(`collisionLabel1 hits `, collisionLabel1.hits([collisionLabel2]), `and the boolean value: `, collisionLabel1.hits([collisionLabel2]).length!=0?"TRUE":"FALSE")
+//console.warn(`collisionLabel1 hits `, collisionLabel1.hits([collisionLabel2]), `and the boolean value: `, collisionLabel1.hits([collisionLabel2]).length!=0?"TRUE":"FALSE")
 
-let advLbl = new AdvancedLabel("Baller", 300,300, "red").setFont("arial", 50).setText("More baller than before").bolden().italicize();
+
+let collisionCircle = scene.addCircle(520, 220, 15)
+let collisionCircle2 = scene.addCircle(520-Math.sqrt(2)*14.99, 220-Math.sqrt(2)*14.99, 15, null, false, "teal")
+console.warn(`collisionCircle hits `, collisionCircle.hits([collisionCircle2]), `and the boolean value: `, collisionCircle.hits([collisionCircle2]).length!=0?"TRUE":"FALSE")
+
+
+let advLbl = new AdvancedLabel("Baller", 300,300, true, "red").setFont("arial", 50).setText("More baller than before").bolden().italicize();
 scene.addSprite(advLbl);
 
 //scene.setGravity(600)
@@ -119,7 +120,7 @@ let direction = 1;
 let directiony = 1;
 var speed = 3;
 let speed2 = 10;
-let speed3 = 20;
+let speed3 = 10;
 let gravity = 1.1;
 
 game.onStep(()=>{
@@ -170,15 +171,15 @@ game.onStep(()=>{
     
     testingBuddy.x += direction * speed;
     testingBuddy.y += directiony * speed;
-    if(testingBuddy.right>game.right-direction*speed || testingBuddy.left<game.left-direction*speed){
-       direction*=-1;
-       testingBuddy.fillColor = `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
-       game.playNote(testingBuddy.y,"sine");
+    if (testingBuddy.right > game.right - direction * speed || testingBuddy.left < game.left - direction * speed) {
+        direction *= -1;
+        testingBuddy.fillColor = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`
+        //game.playNote(testingBuddy.y,"sine");
     }
-    if(testingBuddy.bottom>game.bottom-directiony*speed || testingBuddy.top<game.top-directiony*speed){
-        directiony*=-1;
-        testingBuddy.fillColor = `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
-        game.playNote(testingBuddy.x,"sine");
+    if (testingBuddy.bottom > game.bottom - directiony * speed || testingBuddy.top < game.top - directiony * speed) {
+        directiony *= -1;
+        testingBuddy.fillColor = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`
+        //game.playNote(testingBuddy.x,"sine");
     }
     
     image.y += 3;

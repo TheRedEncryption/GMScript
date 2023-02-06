@@ -1102,47 +1102,141 @@ class Group {
 }
 
 class Collider {
-    constructor(){
+    constructor(x, y){
+        this.x = x;
+        this.y = y;
+    }
 
+    hits(collider){
+        // box-box collision
+        if(this instanceof BoxCollider && collider instanceof BoxCollider){
+            return this.boxBoxCheck(collider);
+        }
+        // circle-circle collision
+        else if(collider instanceof CircleCollider && this instanceof CircleCollider){
+            return this.circleCircleCheck(collider)
+        }
+        // box-circle collision
+        else if((collider instanceof CircleCollider && this instanceof BoxCollider) || (this instanceof CircleCollider && collider instanceof BoxCollider)){
+            return this.boxCircleCheck(collider);
+        }
+        // box-flex collision
+        else if((collider instanceof FlexCollider && this instanceof BoxCollider) || (this instanceof FlexCollider && collider instanceof BoxCollider)){
+            return this.boxFlexCheck(collider);
+        }
+
+    }
+
+    circleCircleCheck(collider){
+        let radiusSum = this.radius + collider.radius;
+        let Dx = collider.x - this.x;
+        let Dy = collider.y - this.y;
+        return Dx * Dx + Dy * Dy <= radiusSum * radiusSum
+    }
+
+    boxCircleCheck(collider){
+        let boxColliderX1;
+        let boxColliderY1;
+        let boxColliderX2;
+        let boxColliderY2;
+        let circleColliderX;
+        let circleColliderY;
+        let colliderRadius;
+
+        if(collider instanceof CircleCollider){
+            boxColliderX1 = this.x;
+            boxColliderY1 = this.y;
+            boxColliderX2 = this.right;
+            boxColliderY2 = this.bottom;
+            circleColliderX = collider.x;
+            circleColliderY = collider.y;
+            colliderRadius = collider.radius;
+        }
+        else{
+            boxColliderX1 = collider.x;
+            boxColliderY1 = collider.y;
+            boxColliderX2 = collider.x + collider.width;
+            boxColliderY2 = collider.y + collider.height;
+            circleColliderX = this.x;
+            circleColliderY = this.y;
+            colliderRadius = this.radius;
+        }
+
+
+        // Find the nearest point on the
+        // rectangle to the center of
+        // the circle
+        let Xn = Math.max(boxColliderX1, Math.min(circleColliderX, boxColliderX2));
+        let Yn = Math.max(boxColliderY1, Math.min(circleColliderY, boxColliderY2));
+        // Find the distance between the
+        // nearest point and the center
+        // of the circle
+        // Distance between 2 points,
+        // (x1, y1) & (x2, y2) in
+        // 2D Euclidean space is
+        // ((x1-x2)**2 + (y1-y2)**2)**0.5
+        let Dx = Xn - circleColliderX;
+        let Dy = Yn - circleColliderY;
+        return (Dx * Dx + Dy * Dy) <= colliderRadius * colliderRadius;
+    }
+
+    boxBoxCheck(boxCollider){
+        if(this.right>=boxCollider.left && this.left<=boxCollider.right && this.bottom>=boxCollider.top && this.top<=boxCollider.bottom){
+            return true
+        }
+    }
+
+    boxFlexCheck(collider){
+        let boxColliderX1;
+        let boxColliderY1;
+        let boxColliderX2;
+        let boxColliderY2;
+        let flexPoints;
+
+        if(collider instanceof CircleCollider){
+            boxColliderX1 = this.x;
+            boxColliderY1 = this.y;
+            boxColliderX2 = this.right;
+            boxColliderY2 = this.bottom;
+            flexPoints = collider.points;
+        }
+        else{
+            boxColliderX1 = collider.x;
+            boxColliderY1 = collider.y;
+            boxColliderX2 = collider.x + collider.width;
+            boxColliderY2 = collider.y + collider.height;
+            flexPoints = this.points;
+        }
+        return console.error("NO SUPPORT FOR FLEX COLLIDERS RIGHT NOW")
     }
 }
 
 class BoxCollider extends Collider{
     constructor(left, top, right, bottom){
-        super();
+        super(left, top);
         //console.warn("bx", left, top, right-left, bottom-top, right, bottom)
         this.left = left;
         this.top = top;
         this.right = right;
         this.bottom = bottom;
     }
+}
 
-    hits(boxCollider){
-        //console.warn(this, boxCollider)
-        //console.log(this.right>=boxCollider.left)
-        //console.log(this.left<=boxCollider.right)
-        //console.log(this.bottom>=boxCollider.top)
-        //console.log(this.top<=boxCollider.bottom)
-        if(this.right>=boxCollider.left && this.left<=boxCollider.right && this.bottom>=boxCollider.top && this.top<=boxCollider.bottom){
-            return true
-        }
+class CircleCollider extends Collider{
+    constructor(centerX, centerY, radius){
+        super(centerX, centerY);
+        //console.warn("bx", left, top, right-left, bottom-top, right, bottom)
+        this.radius = radius;
+        this.left = this.x-this.radius;
+        this.top = this.y-this.radius;
+        this.right = this.x+this.radius;
+        this.bottom = this.y+this.radius;
     }
 }
 
-class MeshCollider extends Collider{
+class FlexCollider extends Collider{
     constructor(points){
         this.points = points!=undefined ? points : [];
-    }
-
-    /**
-     * Checks if it the current collider hits the given collider
-     * @param {Collider} collider Any collider object
-     */
-    hits(collider){
-        // Check if the line between points in the mesh hits the line between corners of the box
-        if(collider.constructor.name == BoxCollider.name){
-
-        }
     }
 }
 
@@ -1150,12 +1244,12 @@ class MeshCollider extends Collider{
 class Sprite {
 
     // list of acceptable types, can be expanded later
-    #acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon", "line"];
 
     // constructor for such
     constructor(type, x, y, color) {
+        let acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon", "line"];
         
-        if (!this.#acceptableTypes.includes(type)) { throw new Error(`${type} is not a valid type, use one of the following: ${this.#acceptableTypes.join(", ")}`) }
+        if (!acceptableTypes.includes(type)) { throw new Error(`${type} is not a valid type, use one of the following: ${acceptableTypes.join(", ")}`) }
         if (typeof x != "number" || typeof y != "number") { throw new Error(`x or y is not a number: x: ${x}, y: ${y}`) }
         
         this.type = type;
@@ -1171,6 +1265,28 @@ class Sprite {
         this.lineRounding = "miter";
         
         this.floorPosition = null;
+    }
+
+    updateCollider(){
+        if(!this.collider){
+            return;
+        }
+        this.collider.x = this.x;
+        this.collider.y = this.y;
+
+        if(this.collider instanceof CircleCollider){
+            this.collider.radius = this.radius;
+            this.collider.left = this.x-this.radius;
+            this.collider.top = this.y-this.radius;
+            this.collider.right = this.x+this.radius;
+            this.collider.bottom = this.y+this.radius;
+        }
+        else if(this.collider instanceof BoxCollider){
+            this.collider.left = this.x
+            this.collider.top = this.y;
+            this.collider.right = this.x+this.width;
+            this.collider.bottom = this.y+this.height;
+        }
     }
 
     // converts degree input to radian (unless second parameter is false)
@@ -1263,6 +1379,7 @@ class Line extends Sprite{
 
     drawSprite(ctx){
         this.updateShape();
+        this.updateCollider();
         this.checkFloor();
         ctx.beginPath();
         ctx.strokeStyle = this.fillColor != null ? this.fillColor : "rgba(0,0,0,0)";
@@ -1318,6 +1435,7 @@ class Polygon extends Sprite{
     }
 
     drawSprite(ctx){
+        this.updateCollider();
         this.checkFloor();
         if(this.points.length>=1){
             ctx.beginPath();
@@ -1347,6 +1465,21 @@ class Circle extends Sprite {
         this.radius = radius;
         this.isFilled = isFilled;
         this.strokeColor = strokeColor;
+        this.collider = new CircleCollider(this.x,this.y,this.radius);
+    }
+
+    hits(hitsArray){
+        if(!Array.isArray(hitsArray)){return console.error(`.hits(Array) needs an array... ${hitsArray}`)}
+        hitsArray.forEach((element)=>{
+            if(!(element instanceof Sprite||element instanceof Group)){return console.error(`.hits(Array) needs the array to contain only Sprites or Groups... ${element} in ${hitsArray}`)}
+        })
+        let successArray = []
+        hitsArray.forEach((element)=>{
+            if(element.collider.hits(this.collider)){
+                successArray.push(element);
+            }
+        })
+        return successArray;
     }
 
     updateShape() {
@@ -1360,6 +1493,7 @@ class Circle extends Sprite {
 
     drawSprite(ctx) {
         this.updateShape();
+        this.updateCollider();
         this.checkFloor();
         ctx.beginPath();
         ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
@@ -1382,6 +1516,7 @@ class RegularPolygon extends Circle{
     
     drawSprite(ctx){
         this.updateShape();
+        this.updateCollider();
         this.checkFloor();
         let temp = [];
         ctx.beginPath();
@@ -1421,7 +1556,7 @@ class Rectangle extends Sprite {
         this.top = this.y;
         this.right = this.x + this.width;
         this.bottom = this.y + this.height;
-        this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
+        this.collider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
     hits(hitsArray){
@@ -1431,7 +1566,7 @@ class Rectangle extends Sprite {
         })
         let successArray = []
         hitsArray.forEach((element)=>{
-            if(element.boxCollider.hits(this.boxCollider)){
+            if(element.collider.hits(this.collider)){
                 successArray.push(element);
             }
         })
@@ -1446,7 +1581,7 @@ class Rectangle extends Sprite {
         this.bottom = this.y + this.height * this.scale;
         this.width = this.right-this.left;
         this.height = this.bottom-this.top;
-        this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
+        this.collider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
     // the Rectangle's drawSprite() function
@@ -1454,6 +1589,7 @@ class Rectangle extends Sprite {
 
         // updates the shape's properties
         this.updateShape();
+        this.updateCollider();
         this.checkFloor();
         ctx.beginPath();
         
@@ -1514,12 +1650,13 @@ class ImageSprite extends Rectangle {
         this.top = this.y;
         this.right = this.x + this.width * this.scale;
         this.bottom = this.y + this.height * this.scale;
-        this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
+        this.collider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
     // Draw a sprite.
     drawSprite(ctx) {
         this.updateShape();
+        this.updateCollider();
         this.rotate(ctx);
     }
 
@@ -1576,7 +1713,7 @@ class Label extends Rectangle {
         this.textValue = textValue;
         this.hAlign = "left";
         this.vAlign = "top";
-        this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
+        this.collider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
     // Sets the alignment of the rectangle.
@@ -1600,7 +1737,7 @@ class Label extends Rectangle {
             this.width = metrics.width;
             this.height = actualHeight;
             super.updateShape()
-            this.boxCollider = new BoxCollider(this.x, this.y, this.right, this.bottom)
+            this.collider = new BoxCollider(this.x, this.y, this.right, this.bottom)
         }
 
         /* NOT WORKING cause im cringe
@@ -1628,6 +1765,7 @@ class Label extends Rectangle {
     drawSprite(ctx) {
         
         this.updateShape();
+        this.updateCollider();
         this.checkFloor();
         ctx.beginPath();
         
@@ -1664,7 +1802,7 @@ class Label extends Rectangle {
 
 class AdvancedLabel extends Rectangle {
     //x, y, width, height, fillColor = "black", isFilled = true, strokeColor = null
-    constructor(textValue, x, y, fillColor = "black", isFilled = true, strokeColor = null) {
+    constructor(textValue, x, y, autoAlign = true, fillColor = "black", isFilled = true, strokeColor = null) {
         let canvas = document.createElement("canvas");
         // Might need to make a 3D Label as a seperate class
         let ctx = canvas.getContext('2d');
@@ -1673,6 +1811,7 @@ class AdvancedLabel extends Rectangle {
         let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
 
         super(x,y,metrics.width,actualHeight, fillColor, isFilled, strokeColor);
+        this.autoAlign = autoAlign;
         this.fontSize = 12;
         this.font = "arial";
         this.fontBold = 'normal'
@@ -1699,6 +1838,9 @@ class AdvancedLabel extends Rectangle {
     }
 
     updatePlacement(){
+        if(!this.autoAlign){
+            return;
+        }
         let nextX;
         this.letters.forEach((letterLabel)=>{
             let newLetter = letterLabel.setFont(this.font, this.fontSize).bolden(this.fontBold).italicize(this.fontItalic);
