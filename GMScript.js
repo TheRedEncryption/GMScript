@@ -314,6 +314,9 @@ class Game {
         return this.currentScene == scene;
     }
 
+    /**
+     * Clears the canvas
+     */
     clearCanvas(){
         this.canvas.getContext(this.contextType).clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
@@ -461,6 +464,17 @@ class Game {
         return this.currentScene.addLabel(textValue, x, y, fillColor, isFilled, strokeColor);
     }
 
+    /**
+     * Creates an advanced label and adds it to the currentScene
+     * @param {string} textValue The text to be displayed
+     * @param {number} x 
+     * @param {number} y 
+     * @param {boolean} autoAlign 
+     * @param {string|null} fillColor Color of the text
+     * @param {boolean} isFilled Whether the text is filled in or not
+     * @param {string|null} strokeColor Color of the text border
+     * @returns the AdvancedLabel object
+     */
     addAdvancedLabel(textValue, x, y, autoAlign = true, fillColor = "black", isFilled = true, strokeColor = null){
         if (!textValue || x==undefined || y==undefined) { throw new Error("addLabel requires (textValue, x, y) arguments") }
         return this.currentScene.addAdvancedLabel(textValue, x, y, autoAlign, fillColor, isFilled, strokeColor);
@@ -488,6 +502,10 @@ class Game {
     //     })
     // }
 }
+/**
+* Hopefully a 3D version of the Game class that creates a 3D canvas
+* @class Game3D
+*/
 class Game3D extends Game {
     constructor(canvas = null, scenes = null) {
         super(canvas, scenes);
@@ -656,7 +674,16 @@ class Game3D extends Game {
     }
 
 }
+/**
+ * Class for a top down game
+ * @class TopDownGame
+ */
 class TopDownGame extends Game{
+    /**
+     * Creates a TopDownGame which implements a basic scene and simple movement
+     * @param {boolean} isOpenBorders Whether the game should have walls at the edge of the canvas or not
+     * @param {HTMLCanvasElement} canvas Pre-created canvas goes here
+     */
     constructor(isOpenBorders = false, canvas = null) {
         super(canvas);
         this.player = new Circle(300,300,20)
@@ -735,7 +762,6 @@ class TopDownGame extends Game{
 }
 
 class Scene {
-    // Realistically a Scene has no default sprites
     spritesArray;
     constructor(sprites) {
         if (!Array.isArray(sprites) && sprites != undefined) { throw Error(`${sprites} is not an Array`) }
@@ -746,18 +772,28 @@ class Scene {
         this.parentGame = null;
     }
 
-    // Add a sprite to the sprites collection.
+    /**
+     * General collection for addSprite methods.
+     */
     addSprite() {
         //console.log(this.spritesArray)
         let self = this.spritesArray;
-
-        // lets the user define the Sprite object to be added
+        /**
+         * Lets the user define the Sprite object to be added
+         * @param {string} type the type of the sprite
+         * @param {number} x x position of the sprite
+         * @param {number} y y position of the sprite
+         * @param {string} color the color of the sprite
+         */
         let addSpriteInit = function (type, x, y, color = "black") {
             if (!type || x==undefined || y==undefined) { throw new Error("addSprite requires (type, x, y) arguments or (Sprite)") }
             self.push(new Sprite(type, x, y, color))
         }
 
-        // lets the user create the sprite before calling addSprite()
+        /**
+         * lets the user create the sprite before calling addSprite()
+         * @param {Sprite} spriteSubclass add a predefined sprite object
+         */
         let addSpritePredefined = function (spriteSubclass) {
             if (!(spriteSubclass instanceof Sprite)) { throw new Error("addSprite requires (type, x, y) arguments or (Sprite)") }
             self.push(spriteSubclass)
@@ -775,7 +811,12 @@ class Scene {
         }
     }
     
-    // Checks if a list contains an object.
+    /**
+     * Checks if a list contains an object.
+     * @param {*} obj 
+     * @param {Array} list 
+     * @returns 
+     */
     #containsObject(obj, list) {
         var i;
         for (i = 0; i < list.length; i++) {
@@ -786,6 +827,10 @@ class Scene {
         return false;
     }
     
+    /**
+     * Removes the sprite from the scene
+     * @param {Sprite} sprite The sprite object to remove
+     */
     remove(sprite){
         if((this.#containsObject(sprite, this.spritesArray))){
             let index = this.spritesArray.indexOf(sprite);
@@ -798,7 +843,10 @@ class Scene {
         }
     }
 
-    // Add a group to the game object.
+    /**
+     * Add a group to the game object.
+     * @param {Group} group The Group object to add to the scene
+     */
     addGroup(group){
         if(!(group instanceof Group)){return console.error(`addGroup takes a Group object as input... ${group}`)}
         group.sprites.forEach((sprite)=>{
@@ -822,6 +870,12 @@ class Scene {
         arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
     };
 
+    /**
+     * Changes the layer of a sprite
+     * @param {Sprite} sprite The Sprite object which should change layer
+     * @param {string|number} layer Either the number of the layer it should move to or "top" "bottom" or "middle"
+     * @returns The sprite
+     */
     setSpriteLayer(sprite, layer){
         if(typeof layer == "string"){
             if(!(layer=="top"||layer=="bottom"||layer=="middle")){
@@ -986,6 +1040,17 @@ class Scene {
         return temp;
     }
     
+    /**
+     * Creates an advanced label and adds it to the currentScene
+     * @param {string} textValue The text to be displayed
+     * @param {number} x 
+     * @param {number} y 
+     * @param {boolean} autoAlign 
+     * @param {string|null} fillColor Color of the text
+     * @param {boolean} isFilled Whether the text is filled in or not
+     * @param {string|null} strokeColor Color of the text border
+     * @returns the AdvancedLabel object
+     */
     addAdvancedLabel(textValue, x, y, autoAlign = true, fillColor = "black", isFilled = true, strokeColor = null){
         if (!textValue || x==undefined || y==undefined) { throw new Error(`addLabel requires (textValue, x, y) arguments... ${textValue}, ${x}, ${y}`) }
         let temp = new AdvancedLabel(textValue, x, y, autoAlign, fillColor, isFilled, strokeColor);
@@ -1020,24 +1085,36 @@ class Scene {
         return temp;
     }
 
-    setGravity(floorPosition = -1, gravityVal=0.3, sceneSpeed = 0){
+    /**
+     * Sets the gravity of the entire scene, very jank
+     * @param {number} floorPosition the position of the floor
+     * @param {number} gravityVal how much gravity there should be
+     * @param {number} sceneSpeed what the initial scene speed should be
+     */
+    setGravity(floorPosition = -Infinity, gravityVal=0.3, sceneSpeed = 0){
         this.gravityVal = gravityVal;
         this.sceneSpeed = sceneSpeed;
-        this.floorPosition = this.addFloor(floorPosition);
+        this.floorPosition = this.#addFloor(floorPosition);
     }
 
-    addFloor(floorPosition){
-        if(floorPosition==-1){
+    #addFloor(floorPosition){
+        if(floorPosition==-Infinity){
             return null;
         }
         return floorPosition;
     }
 
+    /**
+     * Clears the canvas
+     */
     clearCanvas(){
         this.parentGame.canvas.getContext(this.parentGame.contextType).clearRect(0,0,this.parentGame.canvas.width, this.parentGame.canvas.height);
     }
     
-    // render function that draws all the sprites inside of each scene
+    /**
+     * Render function that draws all the sprites inside of each scene
+     * @param {HTMLCanvasElement} canvas The canvas element that should be rendered on
+     */
     render(canvas) {
         let ctx = canvas.getContext(this.parentGame!=null?this.parentGame.contextType:"2d");
         this.sceneSpeed += this.gravityVal;
@@ -1050,6 +1127,11 @@ class Scene {
 }
 
 class Group {
+    /**
+     * 
+     * @param  {...any} args 
+     * @returns 
+     */
     constructor(...args){
         if(!Array.isArray(args)){
             return console.error("Args is not an array")
@@ -1058,8 +1140,9 @@ class Group {
         let maxX;
         let minY;
         let maxY;
-        // BUG/ISSUE : THIS NEEDS ANOTHER FOR LOOP FOR EACH SPRITE
+        // FIXME: THIS NEEDS ANOTHER FOR LOOP FOR EACH SPRITE
         // LOOP THROUGH THE TOP LEFT BOTTOM AND RIGHT VALUE TO GET MIN AND MAX
+        // NOTE: this might not be an issue? i haven't looked into it  
         args.forEach((arg)=>{
             if(!(arg instanceof Sprite)){
                 return console.error(`One of the args is not a sprite... ${arg}`)
@@ -1082,6 +1165,10 @@ class Group {
         this.sprites = args;
     }
 
+    /**
+     * Adds a sprite to the group
+     * @param {Sprite} sprite The sprite to add
+     */
     addSprite(sprite){
         let minX;
         let maxX;
@@ -1109,23 +1196,42 @@ class Group {
         this.sprites.push(sprite);
     }
     
+    /**
+     * Sets the left side of the group
+     * @param {number} pixels 
+     */
     setLeft(pixels) {
         this.left = pixels;
         this.x = this.left;
     }
+    /**
+     * Sets the top side of the group
+     * @param {number} pixels 
+     */
     setTop(pixels) {
         this.top = pixels;
         this.y = this.top;
     }
+    /**
+     * Sets the right side of the group
+     * @param {number} pixels 
+     */
     setRight(pixels) {
         this.right = pixels;
         this.x = this.right - this.width;
     }
+    /**
+     * Sets the bottom side of the group
+     * @param {number} pixels 
+     */
     setBottom(pixels) {
         this.bottom = pixels;
         this.y = this.bottom - this.height;
     }
     
+    /**
+     * Adjusts the values for the group, such as left right top bottom, and updates the sprites inside the group
+     */
     updateGroup(){
         this.left = this.x;
         this.right = this.x + this.width;
@@ -1142,6 +1248,10 @@ class Group {
         this.prevY = this.y;
     }
 
+    /**
+     * Draws the group
+     * @param {CanvasRenderingContext2D} ctx The canvas 2D context
+     */
     drawSprite(ctx){
         this.updateGroup();
         this.sprites.forEach((sprite)=>{
@@ -1289,14 +1399,22 @@ class FlexCollider extends Collider{
     }
 }
 
-// declaration for the Sprite object (only serves as a superclass and does not work as a sprite of its own)
+/**
+ * Declaration for the Sprite object (only serves as a superclass and does not work (well) as a sprite of its own)
+ * @class Sprite
+ */
 class Sprite {
 
-    // list of acceptable types, can be expanded later
-
-    // constructor for such
+    /**
+     * Creates a Sprite object
+     * @param {string} type Type of Sprite
+     * @param {number} x x position of the Sprite
+     * @param {number} y y position of the Sprite
+     * @param {string} color The color of the Sprite
+     */
     constructor(type, x, y, color) {
-        let acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon", "line", "svg"];
+        // list of acceptable types, can be expanded later
+        let acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon", "line"];
         
         if (!acceptableTypes.includes(type)) { throw new Error(`${type} is not a valid type, use one of the following: ${acceptableTypes.join(", ")}`) }
         if (typeof x != "number" || typeof y != "number") { throw new Error(`x or y is not a number: x: ${x}, y: ${y}`) }
@@ -1316,6 +1434,9 @@ class Sprite {
         this.floorPosition = null;
     }
 
+    /**
+     * Updates the collider of each sprite
+     */
     updateCollider(){
         if(!this.collider){
             console.warn("Default box collider has been added for " + this + " because it did not have one");
@@ -1340,7 +1461,11 @@ class Sprite {
         }
     }
 
-    // converts degree input to radian (unless second parameter is false)
+    /**
+     * Sets the rotation property converts degree input to radian (unless second parameter is false)
+     * @param {number} rotation 
+     * @param {boolean} isDegrees 
+     */
     setRotation(rotation, isDegrees = true) {
         if (isDegrees) {
             this.rotation = rotation * Math.PI / 180
@@ -1350,6 +1475,11 @@ class Sprite {
         }
     }
 
+    /** FIXME
+     * Does not work. It's supposed to set the scale.
+     * @param {number} scale 
+     * @returns The Sprite for easy chaining
+     */
     setScale(scale){
         this.scale = scale;
         this.updateShape();
