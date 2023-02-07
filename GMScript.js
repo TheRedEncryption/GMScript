@@ -32,7 +32,13 @@ const contactProxyHandlers = {
         if (rexAllNegativeDigits.test(key) && Math.abs(key) <= target.scenes.length) {
             return target.scenes[target.scenes.length + parseInt(key)];
         }
-        if (rexAllDigits.test(key)) {
+        else if (rexAllDigits.test(key)) {
+            if(key >= target.scenes.length){
+                let temp = key-target.scenes.length+1;
+                for(var i = 0; i < temp; i++){
+                    target.createScene();
+                }
+            }
             return target.scenes[key];
         }
         return target[key];
@@ -243,7 +249,7 @@ class Game {
     addInputReciever(inputType, methodToCall){
         if(!(inputType.toLowerCase()=="wasd"||inputType.toLowerCase()=="mouse"))
             console.warn(`inputType is not a default, ensure that the input is a key on the keyboard, or instead use "wasd" or "mouse" ... ${inputType}`);
-        let theArray = [inputType.toLowerCase(),methodToCall]
+        let theArray = [inputType.toLowerCase(),methodToCall, this.canvas]
         this.inputRecievers.push(theArray);
         return theArray;
     }
@@ -587,7 +593,7 @@ class Game3D extends Game {
             return shader;
         }
 
-        console.log(gl.getShaderInfoLog(shader));  // eslint-disable-line
+        //console.log(gl.getShaderInfoLog(shader));  // eslint-disable-line
         gl.deleteShader(shader);
         return undefined;
     }
@@ -602,7 +608,7 @@ class Game3D extends Game {
             return program;
         }
 
-        console.log(gl.getProgramInfoLog(program));  // eslint-disable-line
+        //console.log(gl.getProgramInfoLog(program));  // eslint-disable-line
         gl.deleteProgram(program);
         return undefined;
     }
@@ -724,7 +730,7 @@ class Scene {
 
     // Add a sprite to the sprites collection.
     addSprite() {
-        console.log(this.spritesArray)
+        //console.log(this.spritesArray)
         let self = this.spritesArray;
 
         // lets the user define the Sprite object to be added
