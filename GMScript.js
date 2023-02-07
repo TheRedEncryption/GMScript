@@ -296,6 +296,24 @@ class Game {
         this.currentScene.render(this.canvas);
     }
 
+    /**
+     * Checks if the sprite is in the current scene
+     * @param {Sprite} sprite The sprite to search for
+     * @returns boolean
+     */
+    currentSceneContains(sprite){
+        return this.currentScene.spritesArray.includes(sprite)
+    }
+
+    /**
+     * Checks if the scene provided is the current scene
+     * @param {Scene} scene The scene to check
+     * @returns boolean
+     */
+    isCurrentScene(scene){
+        return this.currentScene == scene;
+    }
+
     clearCanvas(){
         this.canvas.getContext(this.contextType).clearRect(0, 0, this.canvas.width, this.canvas.height);
     }

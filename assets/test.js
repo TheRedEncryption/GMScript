@@ -146,7 +146,14 @@ let speed2 = 10;
 let speed3 = 10;
 let gravity = 1.1;
 
+// For less delay between the initial scene and the changing scene, render it before the onStep()
+game.renderScene()
+// Make sure to always render the scene or else it will not update
 game.onStep(()=>{
+    if(!game.isCurrentScene(scene)){
+        game.renderScene(); // same as scene.render(HTMLCanvasElement)
+        return;
+    }
     //regPoly2.sides = Math.round(speed);
     speed2+=gravity
     testingSussy.y+=speed2;
@@ -190,8 +197,6 @@ game.onStep(()=>{
     //    polyGroup.setLeft(game.right)
     //}
     
-    game.renderScene(); // same as scene.render(HTMLCanvasElement)
-    
     testingBuddy.x += direction * speed;
     testingBuddy.y += directiony * speed;
     if (testingBuddy.right > game.right - direction * speed || testingBuddy.left < game.left - direction * speed) {
@@ -218,4 +223,5 @@ game.onStep(()=>{
         image2.setBottom(0);
         image2.costumeNumber -= 1;
     }
+    game.renderScene(); // same as scene.render(HTMLCanvasElement)
 })
