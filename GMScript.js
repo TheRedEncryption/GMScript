@@ -290,6 +290,10 @@ class Game {
         this.currentScene.render(this.canvas);
     }
 
+    clearCanvas(){
+        this.canvas.getContext(this.contextType).clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
     // onStep
     /**
      * Calls the provided function a set amount of times per second
@@ -431,6 +435,11 @@ class Game {
     addLabel(textValue, x, y, fillColor="black", isFilled = true, strokeColor = null){
         if (!textValue || x==undefined || y==undefined) { throw new Error("addLabel requires (textValue, x, y) arguments") }
         return this.currentScene.addLabel(textValue, x, y, fillColor, isFilled, strokeColor);
+    }
+
+    addAdvancedLabel(textValue, x, y, autoAlign = true, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!textValue || x==undefined || y==undefined) { throw new Error("addLabel requires (textValue, x, y) arguments") }
+        return this.currentScene.addAdvancedLabel(textValue, x, y, autoAlign, fillColor, isFilled, strokeColor);
     }
     
     /**
@@ -952,6 +961,18 @@ class Scene {
         let temp = new Label(textValue, x, y, fillColor, isFilled, strokeColor);
         return temp;
     }
+    
+    addAdvancedLabel(textValue, x, y, autoAlign = true, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!textValue || x==undefined || y==undefined) { throw new Error(`addLabel requires (textValue, x, y) arguments... ${textValue}, ${x}, ${y}`) }
+        let temp = new AdvancedLabel(textValue, x, y, autoAlign, fillColor, isFilled, strokeColor);
+        this.spritesArray.push(temp);
+        return temp;
+    }
+    static createAdvancedLabel(textValue, x, y, autoAlign = true, fillColor = "black", isFilled = true, strokeColor = null){
+        if (!textValue || x==undefined || y==undefined) { throw new Error(`addLabel requires (textValue, x, y) arguments... ${textValue}, ${x}, ${y}`) }
+        let temp = new AdvancedLabel(textValue, x, y, autoAlign, fillColor, isFilled, strokeColor);
+        return temp;
+    }
 
     /**
      * Adds a line to the sprites.
@@ -986,6 +1007,10 @@ class Scene {
             return null;
         }
         return floorPosition;
+    }
+
+    clearCanvas(){
+        this.parentGame.canvas.getContext(this.parentGame.contextType).clearRect(0,0,this.parentGame.canvas.width, this.parentGame.canvas.height);
     }
     
     // render function that draws all the sprites inside of each scene
@@ -1247,7 +1272,7 @@ class Sprite {
 
     // constructor for such
     constructor(type, x, y, color) {
-        let acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon", "line"];
+        let acceptableTypes = ["rect", "rectangle", "circle", "text", "line", "polygon", "line", "svg"];
         
         if (!acceptableTypes.includes(type)) { throw new Error(`${type} is not a valid type, use one of the following: ${acceptableTypes.join(", ")}`) }
         if (typeof x != "number" || typeof y != "number") { throw new Error(`x or y is not a number: x: ${x}, y: ${y}`) }
@@ -1269,6 +1294,8 @@ class Sprite {
 
     updateCollider(){
         if(!this.collider){
+            console.warn("Default box collider has been added for " + this + " because it did not have one");
+            this.collider = new BoxCollider(this.x, this.y, this.x+1, this.y+1);
             return;
         }
         this.collider.x = this.x;
@@ -1612,7 +1639,7 @@ class Rectangle extends Sprite {
 
 // image sprite (lets you use images as sprites)
 class ImageSprite extends Rectangle {
-    constructor(image, x, y, width = 0, height = 0) {
+    constructor(image, x, y) {
         super(x, y, 0, 0, "black", false);
 
         let tempImages = [];
@@ -1685,7 +1712,7 @@ class ImageSprite extends Rectangle {
             ctx.drawImage(this.currentCostume, -this.width / 2, -this.height / 2, this.width, this.height);
         }
         catch{
-            console.warn(":|");
+            console.error("File is in a broken state, have you provided the correct path location? If so, and it still isn't working, pass an Image() instead of a path");
         }
         ctx.restore();
     }
@@ -1900,5 +1927,61 @@ class AdvancedLabel extends Rectangle {
         }
         this.updatePlacement();
         return this;
+    }
+}
+
+class SVGSprite extends ImageSprite{
+    constructor(data, x, y){
+        let svgImage = new Image();
+        if(!Array.isArray(data)){
+            var upData = [data];
+        }
+        else{
+            var upData = data;
+        }
+        let dataBlob = new Blob(upData, {type: 'image/svg+xml'});
+        var DOMURL = window.URL || window.webkitURL || window;
+        var url = DOMURL.createObjectURL(dataBlob);
+        svgImage.onload = function() {
+            DOMURL.revokeObjectURL(url);
+        }
+        svgImage.src = url;
+
+        super(svgImage, x, y);
+        
+        this.data = upData;
+        this.dataBlob = dataBlob;
+        
+    }
+
+    // Draw a sprite.
+    drawSprite(ctx) {
+        this.updateShape();
+        this.updateCollider();
+        try{
+            ctx.drawImage(this.currentCostume, this.x, this.y);
+        }
+        catch{
+            console.error("File is in a broken state, have you provided the correct path location? If so, and it still isn't working, pass an Image() instead of a path");
+        }
+    }
+
+    /**
+     * Gets the image that was created from the SVG
+     * @returns the svg as an Image object
+     */
+    getImage(){
+        return this.svgImage;
+    }
+
+    // Updates the shape of the image.
+    updateShape() {
+        this.checkFloor();
+    }
+}
+
+class ScalableVectorGraphicSprite extends SVGSprite{
+    constructor(data, x, y){
+        super(data, x, y);
     }
 }
