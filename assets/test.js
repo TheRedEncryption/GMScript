@@ -10,7 +10,7 @@ let scene = game.currentScene;
 let polyGroup = new Group(new Rectangle(275,500,100,100,"rgb(137,50,255)"), new Rectangle(250,400,100,100,"rgb(100,137,255)"), new Rectangle(225,300,100,100,"rgb(150,150,255)"))
 scene.addGroup(polyGroup);
 
-game.addLine(0,600,600,0,"orange").setLineStyle(1)
+game.addLine(100,500,500,100,"orange").setLineStyle(20, [5,30]).setLineCap("round")
 scene.addLabel("testing the scene things",300,300,"orange",true,"rgba(117,85,0,.5)").setFont("Noto Serif Toto", 53).setAlignment("center","center").setLineStyle(2).bolden().italicize();
 scene.addLabel("right aligned",game.right,500,"black",true,"white").setFont("Noto Serif Toto", 50).setAlignment("right","center").setLineStyle(1)
 

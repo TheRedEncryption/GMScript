@@ -1516,7 +1516,6 @@ class Sprite {
      */
     setLineStyle(lineWidth = undefined, dashes = undefined) {
         this.lineWidth = lineWidth?lineWidth:this.lineWidth;
-        console.log(dashes)
         if(dashes==null){
             this.strokeDashes = [];
         }
@@ -1530,6 +1529,11 @@ class Sprite {
         return this;
     }
 
+    /**
+     * Sets the line rounding property
+     * @param {string} lineRounding round property; either "miter", "round", or "bevel"
+     * @returns the object for easy chaining
+     */
     setLineRounding(lineRounding = "miter"){
         let validStrings = ["miter", "round", "bevel"]
         if(validStrings.includes(lineRounding)){
@@ -1565,6 +1569,7 @@ class Line extends Sprite{
         super("line", x1, y1, fillColor)
         this.x2 = x2;
         this.y2 = y2;
+        this.lineCap = "butt";
     }
 
     updateShape(){
@@ -1577,6 +1582,18 @@ class Line extends Sprite{
         this.dashOffset = this.dashOffset>=360?0:this.dashOffset;
     }
 
+    /**
+     * Sets the line cap type of the line
+     * @param {string} type Type of line cap, either "butt", "round", or "square"
+     */
+    setLineCap(type = "butt"){
+        if(!(["butt","round","square"].includes(type))){
+            return console.error(`setLineCap needs either "butt", "round", or "square" for the type... ${type}`)
+        }
+        this.lineCap = type;
+        return this;
+    }
+
     drawSprite(ctx){
         this.updateShape();
         this.updateCollider();
@@ -1586,9 +1603,13 @@ class Line extends Sprite{
         ctx.lineWidth = this.lineWidth;
         ctx.setLineDash(this.strokeDashes)
         ctx.lineDashOffset = this.dashOffset;
+        ctx.lineCap = this.lineCap;
+
         ctx.moveTo(this.x, this.y);
         ctx.lineTo(this.x2, this.y2);
         ctx.stroke();
+
+        ctx.lineCap = "butt";
         ctx.closePath();
     }
 }
