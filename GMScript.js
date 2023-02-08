@@ -1130,7 +1130,6 @@ class Group {
     /**
      * 
      * @param  {...any} args 
-     * @returns 
      */
     constructor(...args){
         if(!Array.isArray(args)){
@@ -1430,6 +1429,8 @@ class Sprite {
         
         this.lineWidth = 1.0;
         this.lineRounding = "miter";
+        this.strokeDashes = [];
+        this.dashOffset = 0;
         
         this.floorPosition = null;
     }
@@ -1507,8 +1508,25 @@ class Sprite {
     }
 
     // sets the line width
-    setLineWidth(lineWidth = 1.0) {
-        this.lineWidth = lineWidth
+    /**
+     * Sets the style of the outline of the Sprite
+     * @param {number|null} lineWidth Width of the line
+     * @param {Array<number>|null} dashes The [width, length] of the dashes, or null for none
+     * @returns 
+     */
+    setLineStyle(lineWidth = undefined, dashes = undefined) {
+        this.lineWidth = lineWidth?lineWidth:this.lineWidth;
+        console.log(dashes)
+        if(dashes==null){
+            this.strokeDashes = [];
+        }
+        else if(!Array.isArray(dashes) && typeof dashes == "number" ){
+            dashes = [dashes];
+        }
+        else if(dashes!=undefined && !Array.isArray(dashes)){
+            return console.error("The input dashes needs to be an array of numbers... " + dashes)
+        }
+        this.strokeDashes = dashes?dashes:this.strokeDashes;
         return this;
     }
 
@@ -1556,6 +1574,7 @@ class Line extends Sprite{
         this.bottom = this.y>this.y2?this.y:this.y2
         this.height= Math.abs(this.y-this.y2);
         this.width= Math.abs(this.x-this.x2);
+        this.dashOffset = this.dashOffset>=360?0:this.dashOffset;
     }
 
     drawSprite(ctx){
@@ -1565,6 +1584,8 @@ class Line extends Sprite{
         ctx.beginPath();
         ctx.strokeStyle = this.fillColor != null ? this.fillColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
+        ctx.setLineDash(this.strokeDashes)
+        ctx.lineDashOffset = this.dashOffset;
         ctx.moveTo(this.x, this.y);
         ctx.lineTo(this.x2, this.y2);
         ctx.stroke();
@@ -1628,6 +1649,8 @@ class Polygon extends Sprite{
             ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
             ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
             ctx.lineWidth = this.lineWidth;
+            ctx.setLineDash(this.strokeDashes)
+            ctx.lineDashOffset = this.dashOffset;
             ctx.stroke();
             ctx.fill();
             ctx.closePath();
@@ -1670,6 +1693,7 @@ class Circle extends Sprite {
         this.bottom = this.y + this.radius / 2 + this.lineWidth;
         this.height=this.radius*2;
         this.width=this.radius*2;
+        this.dashOffset = this.dashOffset>=360?0:this.dashOffset;
     }
 
     drawSprite(ctx) {
@@ -1680,6 +1704,8 @@ class Circle extends Sprite {
         ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
+        ctx.setLineDash(this.strokeDashes)
+        ctx.lineDashOffset = this.dashOffset;
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
@@ -1718,6 +1744,8 @@ class RegularPolygon extends Circle{
         ctx.fillStyle = this.isFilled ? this.fillColor : "rgba(0,0,0,0)";
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
         ctx.lineWidth = this.lineWidth;
+        ctx.setLineDash(this.strokeDashes)
+        ctx.lineDashOffset = this.dashOffset;
         ctx.stroke();
         ctx.fill();
         this.points = temp;
@@ -1762,6 +1790,7 @@ class Rectangle extends Sprite {
         this.bottom = this.y + this.height * this.scale;
         this.width = this.right-this.left;
         this.height = this.bottom-this.top;
+        this.dashOffset = this.dashOffset>=360?0:this.dashOffset;
         this.collider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
@@ -1780,6 +1809,8 @@ class Rectangle extends Sprite {
         
         // set the line width
         ctx.lineWidth = this.lineWidth;
+        ctx.setLineDash(this.strokeDashes);
+        ctx.lineDashOffset = this.dashOffset;
 
         // creates the rectangle, fills it, and then creates the stroke
         ctx.rect(this.x, this.y, this.width * this.scale, this.height * this.scale);
@@ -1855,6 +1886,7 @@ class ImageSprite extends Rectangle {
         this.currentCostume = this.costumes[this.costumeNumber]
         this.width = this.currentCostume.width * this.scale;
         this.height = this.currentCostume.height * this.scale;
+        this.dashOffset = this.dashOffset>=360?0:this.dashOffset;
     }
 
     // saves the canvas, translates, rotates, draws, and then restores
@@ -1960,6 +1992,8 @@ class Label extends Rectangle {
         ctx.strokeStyle = this.strokeColor != null ? this.strokeColor : "rgba(0,0,0,0)";
         
         ctx.lineWidth = this.lineWidth;
+        ctx.setLineDash(this.strokeDashes)
+        ctx.lineDashOffset = this.dashOffset;
         ctx.textAlign = this.hAlign;
         
         

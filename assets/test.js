@@ -10,13 +10,13 @@ let scene = game.currentScene;
 let polyGroup = new Group(new Rectangle(275,500,100,100,"rgb(137,50,255)"), new Rectangle(250,400,100,100,"rgb(100,137,255)"), new Rectangle(225,300,100,100,"rgb(150,150,255)"))
 scene.addGroup(polyGroup);
 
-game.addLine(0,600,600,0,"orange").setLineWidth(1)
-scene.addLabel("testing the scene things",300,300,"orange",true,"rgba(117,85,0,.5)").setFont("Noto Serif Toto", 53).setAlignment("center","center").setLineWidth(2).bolden().italicize();
-scene.addLabel("right aligned",game.right,500,"black",true,"white").setFont("Noto Serif Toto", 50).setAlignment("right","center").setLineWidth(1)
+game.addLine(0,600,600,0,"orange").setLineStyle(1)
+scene.addLabel("testing the scene things",300,300,"orange",true,"rgba(117,85,0,.5)").setFont("Noto Serif Toto", 53).setAlignment("center","center").setLineStyle(2).bolden().italicize();
+scene.addLabel("right aligned",game.right,500,"black",true,"white").setFont("Noto Serif Toto", 50).setAlignment("right","center").setLineStyle(1)
 
 polyGroup.addSprite(new Rectangle(200,200,100,100,"cyan"))
 
-let testingBuddy = new Circle(500,100,50,"teal",true,"navy").setLineWidth(15);
+let testingBuddy = new Circle(500,100,50,"teal",true,"navy").setLineStyle(10, [20,8]);
 testingBuddy.name = "Swift" // YIPPEEEEEEEEEE
 scene.addSprite(testingBuddy);
 
@@ -38,12 +38,12 @@ scene.addSprite(image);
 let image2 = new ImageSprite([direWarning,"assets/info.png","assets/warning.png"], 50, 100);
 scene.addSprite(image2);
 image2.setScale(1.5);
-let theREMOVALRECT = scene.addRectangle(100,100,300,300,"orange").setLineWidth(20).setLineRounding("round")
+let theREMOVALRECT = scene.addRectangle(100,100,300,300,"orange", true, "black").setLineStyle(10, [4, 6]).setLineRounding("round")
 
-let regPoly = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineWidth(25).setLineRounding("round");
+let regPoly = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineStyle(25).setLineRounding("round");
 scene.addSprite(regPoly)
 
-let regPoly2 = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineWidth(25).setLineRounding("round");
+let regPoly2 = new RegularPolygon(300,200,100,3,"orange", true, "rgb(137,50,0)").setLineStyle(25).setLineRounding("round");
 scene.addSprite(regPoly2)
 //scene.setGravity() // create floor for this later
 
@@ -93,7 +93,7 @@ scene.addSprite(new Circle(regPoly.points[0][0], regPoly.points[0][1], 7, "gold"
 let omniGame = new TopDownGame();
 
 
-omniGame.sword = new Line(omniGame.player.x+omniGame.player.radius+10, omniGame.player.y,omniGame.player.x+omniGame.player.radius+50, omniGame.player.y).setLineWidth(4);
+omniGame.sword = new Line(omniGame.player.x+omniGame.player.radius+10, omniGame.player.y,omniGame.player.x+omniGame.player.radius+50, omniGame.player.y).setLineStyle(4);
 omniGame.scenes[0].addSprite(omniGame.sword);
 function updateSword(){
     let angle = Math.round(omniGame.getAngleBetweenPoints(omniGame.player.x, omniGame.player.y, omniGame.lastMousePos[0], omniGame.lastMousePos[1]))
@@ -199,6 +199,7 @@ game.onStep(()=>{
     
     testingBuddy.x += direction * speed;
     testingBuddy.y += directiony * speed;
+    testingBuddy.dashOffset-= (direction/Math.abs(direction))*(directiony/Math.abs(directiony));
     if (testingBuddy.right > game.right - direction * speed || testingBuddy.left < game.left - direction * speed) {
         direction *= -1;
         testingBuddy.fillColor = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`
