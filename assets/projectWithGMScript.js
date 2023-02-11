@@ -7,6 +7,7 @@ let SCENE = GAME[0];
  * A "renderSceneAuto" might be useful because i keep forgetting
  * FIXME: Make adding the input recievers easier and iterable
  * iterable meaning you don't have to set up a reciever just so you can change each property 
+ * FIXME: Make mouseDown event accessible using addInputReciever
  */
 
 // Frequencys from https://pages.mtu.edu/~suits/notefreqs.html
@@ -22,6 +23,21 @@ let whiteKeyDarkColor = "rgb(160,160,160)";
 for(var i = 0; i < 13; i++){
     whiteNotesTop.push(GAME.addRectangle((whiteKeyWidth+2)*i+30, keyTops, whiteKeyWidth, whiteKeyHeight, whiteKeyColor));
 }
+whiteNotesTop[0].frequency = 130.81;
+whiteNotesTop[1].frequency = 146.83;
+whiteNotesTop[2].frequency = 164.81;
+whiteNotesTop[3].frequency = 174.61;
+whiteNotesTop[4].frequency = 196.00;
+whiteNotesTop[5].frequency = 220.00;
+whiteNotesTop[6].frequency = 246.94;
+whiteNotesTop[7].frequency = 261.63;
+whiteNotesTop[8].frequency = 293.66;
+whiteNotesTop[9].frequency = 329.63;
+whiteNotesTop[10].frequency = 349.23;
+whiteNotesTop[11].frequency = 392.00;
+whiteNotesTop[12].frequency = 440.00;
+
+
 let blackNotesTop = []
 let blackKeyWidth = whiteKeyWidth/2;
 let blackKeyHeight = 100;
@@ -35,12 +51,39 @@ for(var i = 0; i < 12; i++){
     blackNotesTop.push(GAME.addRectangle((blackKeyWidth+1)*i*2+30+whiteKeyWidth*(3/4), keyTops, blackKeyWidth, blackKeyHeight, blackKeyColor));
 }
 
+GAME.addInputReciever("mouse", (x, y, relativeX, relativeY, pressedButtons)=>{
+    var hitsmth = false;
+    blackNotesTop.forEach((noteKey)=>{
+        if(noteKey.hits([relativeX, relativeY])){
+            noteKey.fillColor = blackKeyDarkColor;
+            hitsmth = true;
+            if(pressedButtons==1){
+                GAME.playNote(noteKey.frequency, noteType)
+            }
+        }
+        else{
+            noteKey.fillColor = blackKeyColor;
+        }
+    })
+    whiteNotesTop.forEach((noteKey)=>{
+        if(noteKey.hits([relativeX, relativeY]) && !hitsmth){
+            noteKey.fillColor = whiteKeyDarkColor;
+            if(pressedButtons==1){
+                GAME.playNote(noteKey.frequency, noteType)
+            }
+        }
+        else{
+            noteKey.fillColor = whiteKeyColor;
+        }
+    })
+})
+
 
 let noteType = "square"
 let setAmount = 10;
 // Top row of white notes
 GAME.addInputReciever("q", ()=>{
-    GAME.playNote(130.81,noteType);
+    GAME.playNote(whiteNotesTop[0].frequency,noteType);
     whiteNotesTop[0].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[0].fillColor = whiteKeyColor;
@@ -48,7 +91,7 @@ GAME.addInputReciever("q", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("w", ()=>{
-    GAME.playNote(146.83,noteType)
+    GAME.playNote(whiteNotesTop[1].frequency,noteType)
     whiteNotesTop[1].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[1].fillColor = whiteKeyColor;
@@ -56,7 +99,7 @@ GAME.addInputReciever("w", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("e", ()=>{
-    GAME.playNote(164.81,noteType)
+    GAME.playNote(whiteNotesTop[2].frequency,noteType)
     whiteNotesTop[2].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[2].fillColor = whiteKeyColor;
@@ -64,7 +107,7 @@ GAME.addInputReciever("e", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("r", ()=>{
-    GAME.playNote(174.61,noteType)
+    GAME.playNote(whiteNotesTop[3].frequency,noteType)
     whiteNotesTop[3].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[3].fillColor = whiteKeyColor;
@@ -72,7 +115,7 @@ GAME.addInputReciever("r", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("t", ()=>{
-    GAME.playNote(196.00,noteType)
+    GAME.playNote(whiteNotesTop[4].frequency,noteType)
     whiteNotesTop[4].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[4].fillColor = whiteKeyColor;
@@ -80,7 +123,7 @@ GAME.addInputReciever("t", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("y", ()=>{
-    GAME.playNote(220.00,noteType)
+    GAME.playNote(whiteNotesTop[5].frequency,noteType)
     whiteNotesTop[5].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[5].fillColor = whiteKeyColor;
@@ -88,7 +131,7 @@ GAME.addInputReciever("y", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("u", ()=>{
-    GAME.playNote(246.94,noteType)
+    GAME.playNote(whiteNotesTop[6].frequency,noteType)
     whiteNotesTop[6].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[6].fillColor = whiteKeyColor;
@@ -96,7 +139,7 @@ GAME.addInputReciever("u", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("i", ()=>{
-    GAME.playNote(261.63,noteType)
+    GAME.playNote(whiteNotesTop[7].frequency,noteType)
     whiteNotesTop[7].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[7].fillColor = whiteKeyColor;
@@ -104,7 +147,7 @@ GAME.addInputReciever("i", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("o", ()=>{
-    GAME.playNote(293.66,noteType)
+    GAME.playNote(whiteNotesTop[8].frequency,noteType)
     whiteNotesTop[8].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[8].fillColor = whiteKeyColor;
@@ -112,7 +155,7 @@ GAME.addInputReciever("o", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("p", ()=>{
-    GAME.playNote(329.63,noteType)
+    GAME.playNote(whiteNotesTop[9].frequency,noteType)
     whiteNotesTop[9].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[9].fillColor = whiteKeyColor;
@@ -120,7 +163,7 @@ GAME.addInputReciever("p", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("[", ()=>{
-    GAME.playNote(349.23,noteType)
+    GAME.playNote(whiteNotesTop[10].frequency,noteType)
     whiteNotesTop[10].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[10].fillColor = whiteKeyColor;
@@ -128,7 +171,7 @@ GAME.addInputReciever("[", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("]", ()=>{
-    GAME.playNote(392.00,noteType)
+    GAME.playNote(whiteNotesTop[11].frequency,noteType)
     whiteNotesTop[11].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[11].fillColor = whiteKeyColor;
@@ -136,7 +179,7 @@ GAME.addInputReciever("]", ()=>{
     bangerAlert.radius+=setAmount;
 })
 GAME.addInputReciever("\\", ()=>{
-    GAME.playNote(440.00,noteType)
+    GAME.playNote(whiteNotesTop[12].frequency,noteType)
     whiteNotesTop[12].fillColor = whiteKeyDarkColor;
     setTimeout(()=>{
         whiteNotesTop[12].fillColor = whiteKeyColor;

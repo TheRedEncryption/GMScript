@@ -190,6 +190,16 @@ class Game {
                 }
             })
         })
+        window.addEventListener("mousedown",(mouse)=>{
+            this.inputRecievers.forEach((methodArr)=>{
+                if(methodArr[0]=="mouse"){
+                    var rect = mouse.target.getBoundingClientRect();
+                    var relativeX = mouse.clientX - rect.left;
+                    var relativeY = mouse.clientY - rect.top;
+                    methodArr[1](mouse.x, mouse.y, relativeX, relativeY, mouse.buttons);
+                }
+            })
+        })
         var self = this;
         this.canvas.addEventListener("mouseleave", function (event) {
             self.mouseHovering = false
@@ -1265,24 +1275,47 @@ class Collider {
         this.y = y;
     }
 
-    hits(collider){
-        // box-box collision
-        if(this instanceof BoxCollider && collider instanceof BoxCollider){
-            return this.boxBoxCheck(collider);
-        }
-        // circle-circle collision
-        else if(collider instanceof CircleCollider && this instanceof CircleCollider){
-            return this.circleCircleCheck(collider)
-        }
-        // box-circle collision
-        else if((collider instanceof CircleCollider && this instanceof BoxCollider) || (this instanceof CircleCollider && collider instanceof BoxCollider)){
-            return this.boxCircleCheck(collider);
-        }
-        // box-flex collision
-        else if((collider instanceof FlexCollider && this instanceof BoxCollider) || (this instanceof FlexCollider && collider instanceof BoxCollider)){
-            return this.boxFlexCheck(collider);
+    hits() {
+
+        let hitsCheckCollider = function (collider, self){
+            // box-box collision
+            if(self instanceof BoxCollider && collider instanceof BoxCollider){
+                return self.boxBoxCheck(collider);
+            }
+            // circle-circle collision
+            else if(collider instanceof CircleCollider && self instanceof CircleCollider){
+                return self.circleCircleCheck(collider)
+            }
+            // box-circle collision
+            else if((collider instanceof CircleCollider && self instanceof BoxCollider) || (self instanceof CircleCollider && collider instanceof BoxCollider)){
+                return self.boxCircleCheck(collider);
+            }
+            // box-flex collision
+            else if((collider instanceof FlexCollider && self instanceof BoxCollider) || (self instanceof FlexCollider && collider instanceof BoxCollider)){
+                return self.boxFlexCheck(collider);
+            }
         }
 
+        let hitsCheckCoord = function (xCoord, yCoord, self) {
+            if(self instanceof BoxCollider){
+                if(xCoord >= self.x && xCoord <= self.right && yCoord > self.y && yCoord<self.bottom){
+                    return true;
+                }
+            }
+            else if (self instanceof CircleCollider){
+                if(Math.pow(xCoord-self.x, 2) + Math.pow(yCoord-self.y, 2) <= Math.pow(self.radius, 2)){
+                    return true;
+                }
+            }
+        }
+
+        // calls the correct function based on the length of the arguments
+        if (arguments.length == 1) {
+            return hitsCheckCollider(arguments[0], this)
+        }
+        else if (arguments.length == 2) {
+            return hitsCheckCoord(arguments[0], arguments[1], this)
+        }
     }
 
     circleCircleCheck(collider){
@@ -1789,18 +1822,31 @@ class Rectangle extends Sprite {
         this.collider = new BoxCollider(this.x, this.y, this.right, this.bottom)
     }
 
+    /**
+     * Checks what objects hit the object and given array
+     * @param {Array<Sprite>|Array<Group>|Array<number>} hitsArray the array of sprites or coordinate pair
+     * @returns Array of elements in `hitsArray` that were hit, or returns a boolean if `hitsArray` is a coord
+     */
     hits(hitsArray){
         if(!Array.isArray(hitsArray)){return console.error(`.hits(Array) needs an array... ${hitsArray}`)}
-        hitsArray.forEach((element)=>{
-            if(!(element instanceof Sprite||element instanceof Group)){return console.error(`.hits(Array) needs the array to contain only Sprites or Groups... ${element} in ${hitsArray}`)}
-        })
-        let successArray = []
-        hitsArray.forEach((element)=>{
-            if(element.collider.hits(this.collider)){
-                successArray.push(element);
+        if(hitsArray[0] instanceof Sprite){
+            hitsArray.forEach((element)=>{
+                if(!(element instanceof Sprite||element instanceof Group)){return console.error(`.hits(Array) needs the array to contain only Sprites or Groups... ${element} in ${hitsArray}`)}
+            })
+            let successArray = []
+            hitsArray.forEach((element)=>{
+                if(element.collider.hits(this.collider)){
+                    successArray.push(element);
+                }
+            })
+            return successArray;
+        }
+        else if (typeof hitsArray[0] == "number"){
+            if(this.collider.hits(hitsArray[0],hitsArray[1])){
+                return true;
             }
-        })
-        return successArray;
+            return false;
+        }
     }
 
     // updates the left, top, right, and bottom values to be used
